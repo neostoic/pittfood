@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PittFood</string>
+    <string name="map_launch">Launch Map</string>
+    <string name="menu_settings">Settings</string>
+    <string name="exit_menu">Exit</string>
+    <string name="title_activity_list_fragment">ListFragment</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    
+    <string-array name="restaurant_array">
+    	<item>Five Guys Burgers and Fries</item>
+    	<item>Primanti Brothers</item>
+    	<item>Quaker Steak and Lube</item>
+    	<item>Golden Palace Buffet</item>
+    </string-array>
+        
+
+</resources>
