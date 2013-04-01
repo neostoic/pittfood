@@ -4,20 +4,21 @@ import java.util.ArrayList;
 
 import org.json.JSONException;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo.State;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -31,6 +32,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class TabActivity extends FragmentActivity implements ActionBar.TabListener {
 
@@ -49,10 +57,10 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
     ViewPager mViewPager;
 
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState); 
+        setContentView(R.layout.activity_main); 
         StrictMode.enableDefaults();
-
+ 
         // Create an adapter that when requested, will return a fragment representing an object in
         // the collection.
         // ViewPager and its adapters use support library fragments, so we must use
@@ -101,7 +109,7 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
 	@Override
 	public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {	
 	}
-    
+	
     // this is for 'setting' menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -120,7 +128,7 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
 	    }
 	    return false;
 	}
-
+    
     public static class AppSectionsPagerAdapter extends FragmentPagerAdapter {
 
     	public AppSectionsPagerAdapter(FragmentManager fm) {
@@ -172,22 +180,27 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
             
             map = ((SupportMapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
             try {
+            	String qsl = conn.getData("tHLJ1pDaaHptb-EbFM2q_A");
+            	String gpb = conn.getData("74wRr6PP6lbaL1YzUcYGAA");
+            	String pb = conn.getData("caGXS6ubNTlv91ZZyoirjQ");
+            	String fgb = conn.getData("P8nY22PirIp-d1GpDn7qnA");
+            	
     			map.addMarker(new MarkerOptions().position(QUAKER)
     					.title("Quaker Steak & Lube")
-    					.snippet(conn.getData("tHLJ1pDaaHptb-EbFM2q_A").split("\"|,")[6])
+    					.snippet(qsl.split("\"|,")[9]+qsl.split("\"|,")[10])
     					.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon)));
     			map.addMarker(new MarkerOptions().position(GOLDEN)
     					.title("Golden Palace Buffet")
-    					.snippet(conn.getData("74wRr6PP6lbaL1YzUcYGAA").split("\"|,")[6])
+    					.snippet(gpb.split("\"|,")[9]+gpb.split("\"|,")[10])
     					.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon)));
     	        map.addMarker(new MarkerOptions().position(PRIMANTI)
     			        .title("Primanti Brothers")
-    			        .snippet(conn.getData("caGXS6ubNTlv91ZZyoirjQ").split("\"|,")[6])
+    			        .snippet(pb.split("\"|,")[9]+pb.split("\"|,")[10])
     			        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon))
     	        );
     	        map.addMarker(new MarkerOptions().position(FIVE)
     			        .title("Five Guys")
-    			        .snippet(conn.getData("P8nY22PirIp-d1GpDn7qnA").split("\"|,")[6])
+    			        .snippet(fgb.split("\"|,")[9]+fgb.split("\"|,")[10])
     			        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon))
     	        );
     		} catch (JSONException e) {
@@ -230,6 +243,5 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
             return view;
         }
     }
-
     
 }

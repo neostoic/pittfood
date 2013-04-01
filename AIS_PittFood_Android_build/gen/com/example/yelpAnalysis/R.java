@@ -8,10 +8,15 @@
 package com.example.yelpAnalysis;
 
 public final class R {
-    public static final class array {
-        public static final int restaurant_array=0x7f070000;
-    }
     public static final class attr {
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int buttonBarButtonStyle=0x7f01000f;
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int buttonBarStyle=0x7f01000e;
         /** <p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -131,6 +136,9 @@ containing a value of this type.
          */
         public static final int zOrderOnTop=0x7f01000d;
     }
+    public static final class color {
+        public static final int black_overlay=0x7f060000;
+    }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
 
@@ -138,45 +146,51 @@ containing a value of this type.
          screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
     
          */
-        public static final int activity_horizontal_margin=0x7f060000;
-        public static final int activity_vertical_margin=0x7f060001;
+        public static final int activity_horizontal_margin=0x7f070000;
+        public static final int activity_vertical_margin=0x7f070001;
     }
     public static final class drawable {
         public static final int fgb=0x7f020000;
-        public static final int gpb=0x7f020001;
-        public static final int ic_launcher=0x7f020002;
-        public static final int icon=0x7f020003;
-        public static final int ms=0x7f020004;
-        public static final int pb=0x7f020005;
-        public static final int qsl=0x7f020006;
+        public static final int food=0x7f020001;
+        public static final int gpb=0x7f020002;
+        public static final int ic_launcher=0x7f020003;
+        public static final int icon=0x7f020004;
+        public static final int ms=0x7f020005;
+        public static final int pb=0x7f020006;
+        public static final int pitt=0x7f020007;
+        public static final int qsl=0x7f020008;
     }
     public static final class id {
-        public static final int action_settings=0x7f04000e;
+        public static final int action_settings=0x7f040010;
+        public static final int food=0x7f040008;
         public static final int hybrid=0x7f040004;
-        public static final int image=0x7f040008;
-        public static final int intro=0x7f040009;
-        public static final int intro2=0x7f04000a;
-        public static final int list=0x7f04000b;
+        public static final int image=0x7f04000a;
+        public static final int intro=0x7f04000b;
+        public static final int intro2=0x7f04000c;
+        public static final int list=0x7f04000d;
         public static final int map=0x7f040006;
-        public static final int maplaunch_button=0x7f04000c;
-        public static final int menu_exit=0x7f04000d;
+        public static final int maplaunch_button=0x7f04000e;
+        public static final int menu_exit=0x7f04000f;
         public static final int none=0x7f040000;
         public static final int normal=0x7f040001;
         public static final int pager=0x7f040005;
+        public static final int pitt=0x7f040007;
         public static final int satellite=0x7f040002;
         public static final int terrain=0x7f040003;
-        public static final int title=0x7f040007;
+        public static final int title=0x7f040009;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
         public static final int activity_map=0x7f030001;
-        public static final int listtab_content=0x7f030002;
-        public static final int listtab_view=0x7f030003;
-        public static final int maptab_content=0x7f030004;
+        public static final int activity_splash=0x7f030002;
+        public static final int listtab_content=0x7f030003;
+        public static final int listtab_view=0x7f030004;
+        public static final int maptab_content=0x7f030005;
     }
     public static final class menu {
         public static final int activity_main=0x7f090000;
         public static final int list=0x7f090001;
+        public static final int splash=0x7f090002;
     }
     public static final class string {
         public static final int action_settings=0x7f050016;
@@ -243,11 +257,14 @@ containing a value of this type.
         find the service-side assets. [CHAR LIMIT=25] 
          */
         public static final int common_signin_button_text_long=0x7f05000d;
+        public static final int dummy_button=0x7f050019;
+        public static final int dummy_content=0x7f05001a;
         public static final int exit_menu=0x7f050014;
         public static final int hello_world=0x7f050017;
         public static final int map_launch=0x7f050012;
         public static final int menu_settings=0x7f050013;
         public static final int title_activity_list_fragment=0x7f050015;
+        public static final int title_activity_tab=0x7f050018;
     }
     public static final class style {
         /** 
@@ -276,8 +293,52 @@ containing a value of this type.
  All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f080001;
+        public static final int ButtonBar=0x7f080003;
+        public static final int ButtonBarButton=0x7f080004;
+        public static final int FullscreenActionBarStyle=0x7f080005;
+        public static final int FullscreenTheme=0x7f080002;
     }
     public static final class styleable {
+        /** 
+         Declare custom theme attributes that allow changing which styles are
+         used for button bars depending on the API level.
+         ?android:attr/buttonBarStyle is new as of API 11 so this is
+         necessary to support previous API levels.
+    
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #ButtonBarContainerTheme_buttonBarButtonStyle com.example.yelpAnalysis:buttonBarButtonStyle}</code></td><td></td></tr>
+           <tr><td><code>{@link #ButtonBarContainerTheme_buttonBarStyle com.example.yelpAnalysis:buttonBarStyle}</code></td><td></td></tr>
+           </table>
+           @see #ButtonBarContainerTheme_buttonBarButtonStyle
+           @see #ButtonBarContainerTheme_buttonBarStyle
+         */
+        public static final int[] ButtonBarContainerTheme = {
+            0x7f01000e, 0x7f01000f
+        };
+        /**
+          <p>This symbol is the offset where the {@link com.example.yelpAnalysis.R.attr#buttonBarButtonStyle}
+          attribute's value can be found in the {@link #ButtonBarContainerTheme} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name android:buttonBarButtonStyle
+        */
+        public static final int ButtonBarContainerTheme_buttonBarButtonStyle = 1;
+        /**
+          <p>This symbol is the offset where the {@link com.example.yelpAnalysis.R.attr#buttonBarStyle}
+          attribute's value can be found in the {@link #ButtonBarContainerTheme} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name android:buttonBarStyle
+        */
+        public static final int ButtonBarContainerTheme_buttonBarStyle = 0;
         /** Attributes that can be used with a MapAttrs.
            <p>Includes the following attributes:</p>
            <table>

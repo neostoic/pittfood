@@ -41,7 +41,7 @@ public class ConnMongoLab {
 	    	}
 	    	catch(Exception e){
 	            Log.e("log_tag", "Error in http connection "+e.toString());
-	            result = "Connection error!";
+	            result = "Error";
 	    	}
 
 	    	//convert response to string
@@ -57,7 +57,7 @@ public class ConnMongoLab {
 	    	}
 	    	catch(Exception e){
 	    		Log.e("log_tag", "Error  converting result "+e.toString());
-	    	    result = "Connection error!";
+	    		result = "Error";
 	        }
 	    	return result;
 		}
