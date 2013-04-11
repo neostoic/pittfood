@@ -1,0 +1,31 @@
+Data Tables:
+	User table (just our users)
+	Restaurant table (from dataset)
+	Ratings table (from dataset & our users Rows are users, Col are restaurants)
+	Prediction table
+	
+User table:
+	userId* (our users)
+	username (unique)
+	password
+	name
+	created-date
+	
+Restaurant table:
+	restaurantId* (yelp)
+	restaurantName
+	address
+	latitude
+	longitude
+	list of categories
+	url
+	
+Ratings table: (all yelp ratings, -1 for blanks) (and our users ratings)
+	userId*
+	restaurantId*
+	rating
+	
+Prediction table: (-1 are restaurants previously rated)
+	userId*
+	restaurantId*
+	prediction

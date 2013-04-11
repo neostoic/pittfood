@@ -35,6 +35,7 @@ public class FoodRecSVD {
         
         FillBlanks();
         CalcPred();
+        UploadMatrix();
         
         predMat.print(predMat.getColumnDimension(), 2);
     }
@@ -103,5 +104,9 @@ public class FoodRecSVD {
         predMat = Uk.times(Sk);
         temp = Sk.times(VkT);
         predMat = predMat.times(temp);
+    }
+
+    private void UploadMatrix() {
+        // 
     }
 }
