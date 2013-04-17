@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package foodrecsvd;
+package foodrecsvdtrain;
 
 import Jama.*;
 import java.io.*;
@@ -14,40 +14,49 @@ import org.json.*;
  *
  * @author Robo-Laptop
  */
-public class FoodRecSVD {
+public class FoodRecSVDTrain {
     // constants
+
     private final String KFILE = "k.txt";
     private final int MAX_SCORE = 5;
     private final int MIN_SCORE = 1;
+    private final int STARTING_K = 0;
     // global variables
     private Matrix ratingsMat, predMat;
     private double[] movieAvgRate;
-    private ArrayList<Integer> restID, userID;
     private Map<Integer, Integer> restIndex, userIndex;
+    private int k;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        new FoodRecSVD();
+        new FoodRecSVDTrain();
     }
 
     // DONT TOUCH
-    private FoodRecSVD() {
+    private FoodRecSVDTrain() {
+        double lastMSE = Double.MAX_VALUE, currMSE = Double.MAX_VALUE;
         init();
         LoadMatrix();
+
         FillBlanks();
-        CalcPred();
+        do {
+            k++;
+            lastMSE = currMSE;
+            currMSE = CalcPred();
+        } while(lastMSE > currMSE);
+
+        uploadK();
     }
 
     // DONT TOUCH
     private void init() {
-        restID = new ArrayList<Integer>();
-        userID = new ArrayList<Integer>();
-
         restIndex = new TreeMap();
         userIndex = new TreeMap();
+
+        k = STARTING_K;
     }
 
     private void LoadMatrix() {
@@ -92,59 +101,64 @@ public class FoodRecSVD {
     }
 
     // DONT TOUCH
-    private void CalcPred() {
+    private double CalcPred() {
         SingularValueDecomposition svd = ratingsMat.svd();
         Matrix temp, temp2;
-        int k;
-        double t;
+        double t, ss = 0;
+        int count = 0;
 
-        try {
-            Scanner scan = new Scanner(new File(KFILE));
-            k = scan.nextInt();
-        } catch (Exception e) {
-            System.err.println(e.getMessage() + ". Continuing with svd rank.");
-            k = svd.rank() - 1;
-        }
+        if (k < svd.rank()) {
+            Matrix Uk = svd.getU().getMatrix(0, ratingsMat.getRowDimension() - 1, 0, k);
+            Matrix Sk = svd.getS().getMatrix(0, k, 0, k);
+            Matrix VkT = svd.getV().getMatrix(0, ratingsMat.getColumnDimension() - 1, 0, k).transpose();
 
-        Matrix Uk = svd.getU().getMatrix(0, ratingsMat.getRowDimension() - 1, 0, k);
-        Matrix Sk = svd.getS().getMatrix(0, k, 0, k);
-        Matrix VkT = svd.getV().getMatrix(0, ratingsMat.getColumnDimension() - 1, 0, k).transpose();
-
-        // sqrt the S_k matrix for computation
-        for (int i = 0; i < k; i++) {
-            for (int j = 0; j < k; j++) {
-                Sk.set(i, j, Math.sqrt(Sk.get(i, j)));
-            }
-        }
-
-        temp = Uk.times(Sk);
-        temp2 = Sk.times(VkT);
-        temp = temp.times(temp2);
-
-        // fill only zeros in the predMat and upload prediction
-        for (int i = 0; i < predMat.getRowDimension(); i++) {
-            for (int j = 0; j < predMat.getColumnDimension(); j++) {
-                if (predMat.get(i, j) == 0) {
-                    t = temp.get(i, j);
-                    if (t > MAX_SCORE) {
-                        t = MAX_SCORE;
-                    } else if (t < MIN_SCORE){
-                        t = MIN_SCORE;
-                    }
-                    predMat.set(i, j, t);
-                    upload(i, j, t);
+            // sqrt the S_k matrix for computation
+            for (int i = 0; i < k; i++) {
+                for (int j = 0; j < k; j++) {
+                    Sk.set(i, j, Math.sqrt(Sk.get(i, j)));
                 }
             }
+
+            temp = Uk.times(Sk);
+            temp2 = Sk.times(VkT);
+            temp = temp.times(temp2);
+            
+            // sum of square errors from previously rated matrix
+            for (int i = 0; i < predMat.getRowDimension(); i++) {
+                for (int j = 0; j < predMat.getColumnDimension(); j++) {
+                    if (predMat.get(i, j) == -1) {
+                        t = temp.get(i, j);
+                        if (t > MAX_SCORE) {
+                            t = MAX_SCORE;
+                        } else if (t < MIN_SCORE) {
+                            t = MIN_SCORE;
+                        }
+
+                        count++;
+                        ss += Math.pow(t - ratingsMat.get(i, j), 2);
+                    }
+                }
+            }
+        } else {
+            ss = Double.MAX_VALUE;
+            count++;
+            k--;
         }
+        return (ss / count);
     }
 
     private void fillRestData() {
         // get all restaurant data from DB
-        
     }
 
-    private void upload(int i, int j, double t) {
-        // upload prediction t for user i and restaurant j
-        
+    // DONT TOUCH
+    private void uploadK() {
+        try {
+            PrintWriter out = new PrintWriter(new File(KFILE));
+            out.println(k);
+            out.close();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 }

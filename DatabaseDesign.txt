@@ -20,12 +20,12 @@ Restaurant table:
 	list of categories
 	url
 	
-Ratings table: (all yelp ratings, -1 for blanks) (and our users ratings)
+Ratings table: (all yelp ratings and our users ratings)
 	userId*
 	restaurantId*
 	rating
 	
-Prediction table: (-1 are restaurants previously rated)
+Prediction table:
 	userId*
 	restaurantId*
 	prediction
