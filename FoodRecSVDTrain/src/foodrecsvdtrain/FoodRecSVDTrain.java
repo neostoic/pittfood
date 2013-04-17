@@ -18,6 +18,7 @@ public class FoodRecSVDTrain {
     // constants
 
     private final String KFILE = "../k.txt";
+    private final double DIFF = 0.0;
     private final int MAX_SCORE = 5;
     private final int MIN_SCORE = 1;
     private final int STARTING_K = 0;
@@ -40,13 +41,14 @@ public class FoodRecSVDTrain {
         double lastMSE = Double.MAX_VALUE, currMSE = Double.MAX_VALUE;
         init();
         LoadMatrix();
-
         FillBlanks();
+        
+        // use MSE to smallest k to give good results
         do {
             k++;
             lastMSE = currMSE;
             currMSE = CalcPred();
-        } while(lastMSE > currMSE);
+        } while(lastMSE > currMSE+DIFF);
 
         uploadK();
     }
@@ -107,7 +109,7 @@ public class FoodRecSVDTrain {
         double t, ss = 0;
         int count = 0;
 
-        if (k < svd.rank()) {
+        if (k < svd.rank()-1) {
             Matrix Uk = svd.getU().getMatrix(0, ratingsMat.getRowDimension() - 1, 0, k);
             Matrix Sk = svd.getS().getMatrix(0, k, 0, k);
             Matrix VkT = svd.getV().getMatrix(0, ratingsMat.getColumnDimension() - 1, 0, k).transpose();
@@ -142,7 +144,6 @@ public class FoodRecSVDTrain {
         } else {
             ss = Double.MAX_VALUE;
             count++;
-            k--;
         }
         return (ss / count);
     }

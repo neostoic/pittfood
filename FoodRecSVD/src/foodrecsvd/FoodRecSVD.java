@@ -9,6 +9,14 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import org.json.*;
+import java.net.URLEncoder;
+
+import org.apache.http.*;
+import org.apache.http.client.*;
+import org.apache.http.client.methods.*;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.*;
+import org.apache.http.message.BasicHeader;
 
 /**
  *
@@ -16,14 +24,19 @@ import org.json.*;
  */
 public class FoodRecSVD {
     // constants
+
     private final String KFILE = "../k.txt";
+    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/<reatuarant_table>?f=";
+    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/<ratings_table>?f=";
+    private final String URL_PRED = "https://api.mongolab.com/api/1/databases/yelptest/collections/<predict_table>?f=";
+    private final String KEY = "uUA22oxSPz3xkYkVkYY8ju3hYPMDugfK";
     private final int MAX_SCORE = 5;
     private final int MIN_SCORE = 1;
     // global variables
     private Matrix ratingsMat, predMat;
     private double[] movieAvgRate;
-    private ArrayList<Integer> restID, userID;
-    private Map<Integer, Integer> restIndex, userIndex;
+    private ArrayList<String> restID, userID;
+    private Map<String, Integer> restIndex, userIndex;
 
     /**
      * @param args the command line arguments
@@ -43,8 +56,8 @@ public class FoodRecSVD {
 
     // DONT TOUCH
     private void init() {
-        restID = new ArrayList<Integer>();
-        userID = new ArrayList<Integer>();
+        restID = new ArrayList<String>();
+        userID = new ArrayList<String>();
 
         restIndex = new TreeMap();
         userIndex = new TreeMap();
@@ -52,10 +65,11 @@ public class FoodRecSVD {
 
     private void LoadMatrix() {
         fillRestData();
+        fillUserData();
 
-        double[][] ratings = {{5, 5, 3, -1, 5, 5}, {5, -1, 4, -1, 4, 4}, {-1, 3, -1, 5, 4, 5}, {5, 4, 3, 3, 5, 5}, {5, 5, -1, -1, -1, 5}};
-        ratingsMat = new Matrix(ratings);
-        predMat = new Matrix(ratingsMat.getRowDimension(), ratingsMat.getColumnDimension());
+        ratingsMat = new Matrix(userID.size(),restID.size());
+        fillRatings();
+        predMat = new Matrix(userID.size(), restID.size());
     }
 
     // DONT TOUCH
@@ -128,7 +142,7 @@ public class FoodRecSVD {
                     t = temp.get(i, j);
                     if (t > MAX_SCORE) {
                         t = MAX_SCORE;
-                    } else if (t < MIN_SCORE){
+                    } else if (t < MIN_SCORE) {
                         t = MIN_SCORE;
                     }
                     predMat.set(i, j, t);
@@ -140,11 +154,128 @@ public class FoodRecSVD {
 
     private void fillRestData() {
         // get all restaurant data from DB
-        
+        try {
+            JSONObject select = new JSONObject();
+            String url;
+            InputStream isr;
+            Scanner scan;
+            String line;
+            HttpClient httpclient = new DefaultHttpClient();
+            
+            select.put("business_id", 1);
+            select.put("_id", 0);
+            
+            url = URL_REST+URLEncoder.encode(select.toString(),"ISO-8859-1")+"&apiKey="+KEY;
+            HttpGet httpget = new HttpGet(url);
+	    HttpResponse response = httpclient.execute(httpget);
+	    HttpEntity entity = response.getEntity();
+	    isr = entity.getContent();
+
+            scan = new Scanner(isr);
+            while((line = scan.nextLine()) != null){
+                // parse line
+                restIndex.put(line,restID.size());
+                restID.add(line);
+            }
+        } catch (Exception e) {
+            System.err.append(e.getMessage());
+        }
     }
 
-    private void upload(int i, int j, double t) {
-        // upload prediction t for user i and restaurant j
+    private void fillUserData() {
+        // get all user data from DB
+        try {
+            JSONObject select = new JSONObject();
+            String url;
+            InputStream isr;
+            Scanner scan;
+            String line;
+            HttpClient httpclient = new DefaultHttpClient();
+            
+            select.put("user_id", 1);
+            select.put("_id", 0);
+            
+            url = URL_RATE+URLEncoder.encode(select.toString(),"ISO-8859-1")+"&apiKey="+KEY;
+            HttpGet httpget = new HttpGet(url);
+	    HttpResponse response = httpclient.execute(httpget);
+	    HttpEntity entity = response.getEntity();
+	    isr = entity.getContent();
+
+            scan = new Scanner(isr);
+            while((line = scan.nextLine()) != null){
+                // parse data
+                if(!userID.contains(line)){
+                    userIndex.put(line,userID.size());
+                    userID.add(line);
+                }
+            }
+        } catch (Exception e) {
+            System.err.append(e.getMessage());
+        }
+    }
+
+    private void fillRatings() {
+        // start with empty ratings matrix
+        for(int i = 0; i < ratingsMat.getRowDimension(); i++){
+            for(int j = 0; j < ratingsMat.getColumnDimension(); j++){
+                ratingsMat.set(i,j,-1);
+            }
+        }
         
+        // get all ratings data from DB
+        try {
+            JSONObject select = new JSONObject();
+            String url;
+            InputStream isr;
+            Scanner scan;
+            String line;
+            HttpClient httpclient = new DefaultHttpClient();
+            
+            select.put("user_id", 1);
+            select.put("business_id", 1);
+            select.put("rating", 1);
+            select.put("_id", 0);
+            
+            url = URL_RATE+URLEncoder.encode(select.toString(),"ISO-8859-1")+"&apiKey="+KEY;
+            HttpGet httpget = new HttpGet(url);
+	    HttpResponse response = httpclient.execute(httpget);
+	    HttpEntity entity = response.getEntity();
+	    isr = entity.getContent();
+
+            scan = new Scanner(isr);
+            while((line = scan.nextLine()) != null){
+                // parse line
+                // get user_id, business_id and user tree to put rating in matrix
+                
+            }
+        } catch (Exception e) {
+            System.err.append(e.getMessage());
+        }
+    }
+    
+    // DONT TOUCH
+    private void upload(int i, int j, double t) {
+        // delete previous prediction
+        
+        
+        // upload prediction t for user i and restaurant j
+        HttpClient client = new DefaultHttpClient();
+        HttpResponse response;
+                JSONObject json = new JSONObject();
+                String registerURL = URL_PRED + "&apiKey=" + KEY;
+
+                try {
+                    HttpPost post = new HttpPost(registerURL);
+                    json.put("userid", userID.get(i));
+                    json.put("restid", restID.get(j));
+                    json.put("prediction", t);
+                    StringEntity se = new StringEntity( json.toString());  
+                    se.setContentType(new BasicHeader("Content-Type", "application/json"));
+                    post.setEntity(se);
+                    response = client.execute(post);
+
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
     }
 }
