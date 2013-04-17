@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PittFood</string>
+    <string name="action_settings">Settings</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Log In</string>
+    <string name="newuser">New to PittFood?</string>
+    <string name="signup">Sign Up</string>
+    <string name="currentuser">Already has an account?</string>
+    <string name="logout">Log out</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="name">Name</string>
+    <string name="title_activity_dashboard">Dashboard</string>
+    <string name="welcome">Welcome!</string>
+
+</resources>
