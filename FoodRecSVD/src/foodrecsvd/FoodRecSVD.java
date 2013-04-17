@@ -16,7 +16,7 @@ import org.json.*;
  */
 public class FoodRecSVD {
     // constants
-    private final String KFILE = "k.txt";
+    private final String KFILE = "../k.txt";
     private final int MAX_SCORE = 5;
     private final int MIN_SCORE = 1;
     // global variables
