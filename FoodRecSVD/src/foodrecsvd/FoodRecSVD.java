@@ -4,19 +4,24 @@
  */
 package foodrecsvd;
 
-import Jama.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import org.json.*;
+import Jama.Matrix;
+import Jama.SingularValueDecomposition;
+import java.io.File;
+import java.io.InputStream;
 import java.net.URLEncoder;
-
-import org.apache.http.*;
-import org.apache.http.client.*;
-import org.apache.http.client.methods.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.TreeMap;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.json.JSONObject;
 
 /**
  *
@@ -26,10 +31,14 @@ public class FoodRecSVD {
     // constants
 
     private final String KFILE = "../k.txt";
-    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/<reatuarant_table>?f=";
-    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/<ratings_table>?f=";
-    private final String URL_PRED = "https://api.mongolab.com/api/1/databases/yelptest/collections/<predict_table>?f=";
+    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/<reatuarant_table>";
+    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/<ratings_table>";
+    private final String URL_PRED = "https://api.mongolab.com/api/1/databases/yelptest/collections/prediction";
     private final String KEY = "uUA22oxSPz3xkYkVkYY8ju3hYPMDugfK";
+    private final String USERID = "user_id";
+    private final String RESTID = "business_id";
+    private final String RATING = "rating";
+    private final String PRED = "prediction";
     private final int MAX_SCORE = 5;
     private final int MIN_SCORE = 1;
     // global variables
@@ -50,8 +59,8 @@ public class FoodRecSVD {
     private FoodRecSVD() {
         init();
         LoadMatrix();
-        FillBlanks();
-        CalcPred();
+        //FillBlanks();
+        //CalcPred();
     }
 
     // DONT TOUCH
@@ -65,11 +74,11 @@ public class FoodRecSVD {
 
     private void LoadMatrix() {
         fillRestData();
-        fillUserData();
+        //fillUserData();
 
-        ratingsMat = new Matrix(userID.size(),restID.size());
-        fillRatings();
-        predMat = new Matrix(userID.size(), restID.size());
+        //ratingsMat = new Matrix(userID.size(), restID.size());
+        //fillRatings();
+        //predMat = new Matrix(userID.size(), restID.size());
     }
 
     // DONT TOUCH
@@ -156,29 +165,30 @@ public class FoodRecSVD {
         // get all restaurant data from DB
         try {
             JSONObject select = new JSONObject();
-            String url;
             InputStream isr;
             Scanner scan;
-            String line;
+            String line, rid, url;
             HttpClient httpclient = new DefaultHttpClient();
-            
-            select.put("business_id", 1);
+
+            select.put(RESTID, 1);
             select.put("_id", 0);
-            
-            url = URL_REST+URLEncoder.encode(select.toString(),"ISO-8859-1")+"&apiKey="+KEY;
+
+            url = URL_REST + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
-	    HttpResponse response = httpclient.execute(httpget);
-	    HttpEntity entity = response.getEntity();
-	    isr = entity.getContent();
+            HttpResponse response = httpclient.execute(httpget);
+            HttpEntity entity = response.getEntity();
+            isr = entity.getContent();
 
             scan = new Scanner(isr);
-            while((line = scan.nextLine()) != null){
-                // parse line
-                restIndex.put(line,restID.size());
-                restID.add(line);
+            while ((line = scan.nextLine()) != null) {
+                if (line.contains(RESTID)) {
+                    rid = getData(RESTID, line);
+                    restIndex.put(rid, restID.size());
+                    restID.add(rid);
+                }
             }
         } catch (Exception e) {
-            System.err.append(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -186,96 +196,134 @@ public class FoodRecSVD {
         // get all user data from DB
         try {
             JSONObject select = new JSONObject();
-            String url;
             InputStream isr;
             Scanner scan;
-            String line;
+            String line, uid, url;
             HttpClient httpclient = new DefaultHttpClient();
-            
-            select.put("user_id", 1);
+
+            select.put(USERID, 1);
             select.put("_id", 0);
-            
-            url = URL_RATE+URLEncoder.encode(select.toString(),"ISO-8859-1")+"&apiKey="+KEY;
+
+            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
-	    HttpResponse response = httpclient.execute(httpget);
-	    HttpEntity entity = response.getEntity();
-	    isr = entity.getContent();
+            HttpResponse response = httpclient.execute(httpget);
+            HttpEntity entity = response.getEntity();
+            isr = entity.getContent();
 
             scan = new Scanner(isr);
-            while((line = scan.nextLine()) != null){
-                // parse data
-                if(!userID.contains(line)){
-                    userIndex.put(line,userID.size());
-                    userID.add(line);
+            while ((line = scan.nextLine()) != null) {
+                if (line.contains(USERID)) {
+                    uid = getData(USERID, line);
+                    // parse data
+                    if (!userID.contains(uid)) {
+                        userIndex.put(uid, userID.size());
+                        userID.add(uid);
+                    }
                 }
             }
         } catch (Exception e) {
-            System.err.append(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
     private void fillRatings() {
         // start with empty ratings matrix
-        for(int i = 0; i < ratingsMat.getRowDimension(); i++){
-            for(int j = 0; j < ratingsMat.getColumnDimension(); j++){
-                ratingsMat.set(i,j,-1);
+        for (int i = 0; i < ratingsMat.getRowDimension(); i++) {
+            for (int j = 0; j < ratingsMat.getColumnDimension(); j++) {
+                ratingsMat.set(i, j, -1);
             }
         }
-        
+
         // get all ratings data from DB
         try {
             JSONObject select = new JSONObject();
-            String url;
             InputStream isr;
             Scanner scan;
-            String line;
+            String line, url, uid, rid, rat;
             HttpClient httpclient = new DefaultHttpClient();
-            
-            select.put("user_id", 1);
-            select.put("business_id", 1);
-            select.put("rating", 1);
+
+            select.put(USERID, 1);
+            select.put(RESTID, 1);
+            select.put(RATING, 1);
             select.put("_id", 0);
-            
-            url = URL_RATE+URLEncoder.encode(select.toString(),"ISO-8859-1")+"&apiKey="+KEY;
+
+            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
-	    HttpResponse response = httpclient.execute(httpget);
-	    HttpEntity entity = response.getEntity();
-	    isr = entity.getContent();
+            HttpResponse response = httpclient.execute(httpget);
+            HttpEntity entity = response.getEntity();
+            isr = entity.getContent();
 
             scan = new Scanner(isr);
-            while((line = scan.nextLine()) != null){
-                // parse line
-                // get user_id, business_id and user tree to put rating in matrix
-                
+            while ((line = scan.nextLine()) != null) {
+                if (line.contains(USERID) && line.contains(RESTID) && line.contains(RATING)) {
+                    // get user_id, business_id and user tree to put rating in matrix
+                    uid = getData(USERID, line);
+                    rid = getData(RESTID, line);
+                    rat = getData(RATING, line);
+
+                    ratingsMat.set(userIndex.get(uid), restIndex.get(rid), Double.parseDouble(rat));
+                }
             }
         } catch (Exception e) {
-            System.err.append(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
-    
+
     // DONT TOUCH
     private void upload(int i, int j, double t) {
-        // delete previous prediction
-        
-        
-        // upload prediction t for user i and restaurant j
-        HttpClient client = new DefaultHttpClient();
-        HttpResponse response;
-                JSONObject json = new JSONObject();
-                String registerURL = URL_PRED + "&apiKey=" + KEY;
+        try {
+            // delete previous prediction
+            String url;
+            HttpClient httpclient = new DefaultHttpClient();
+            JSONObject delete = new JSONObject();
+            HttpPost post;
+            StringEntity se;
+            
+            delete.put(USERID, userID.get(i));
+            delete.put(RESTID, restID.get(j));
+            url = URL_PRED + "?q=" + URLEncoder.encode(delete.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
 
-                try {
-                    HttpPost post = new HttpPost(registerURL);
-                    json.put("userid", userID.get(i));
-                    json.put("restid", restID.get(j));
-                    json.put("prediction", t);
-                    StringEntity se = new StringEntity( json.toString());  
-                    se.setContentType(new BasicHeader("Content-Type", "application/json"));
-                    post.setEntity(se);
-                    response = client.execute(post);
+            post = new HttpPost(url);
+            se = new StringEntity("");
+            se.setContentType(new BasicHeader("Content-Type", "application/json"));
+            post.setEntity(se);
+            httpclient.execute(post);
 
-                } catch(Exception e) {
-                    e.printStackTrace();
-                }
+            // upload prediction t for user i and restaurant j
+            httpclient = new DefaultHttpClient();
+            JSONObject json = new JSONObject();
+            url = URL_PRED + "&apiKey=" + KEY;
+
+            post = new HttpPost(url);
+            json.put(USERID, userID.get(i));
+            json.put(RESTID, restID.get(j));
+            json.put(PRED, t);
+            se = new StringEntity(json.toString());
+            se.setContentType(new BasicHeader("Content-Type", "application/json"));
+            post.setEntity(se);
+            httpclient.execute(post);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private String getData(String id, String line) {
+        int col, com;
+        String result;
+
+        col = line.indexOf(id);
+        col = line.indexOf(":", col);
+        com = line.indexOf(",", col);
+        result = line.substring(col+1, com);
+        
+        if(result.charAt(0)=='"'){
+            result = result.substring(1);
+        }
+        
+        if(result.charAt(result.length()-1)=='"'){
+            result = result.substring(0,result.length()-1);
+        }
+
+        return (line.substring(col + 1, com));
     }
 }
