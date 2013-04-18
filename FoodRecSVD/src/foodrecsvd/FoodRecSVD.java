@@ -31,7 +31,7 @@ public class FoodRecSVD {
     // constants
 
     private final String KFILE = "../k.txt";
-    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/<reatuarant_table>";
+    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/restaurant";
     private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/<ratings_table>";
     private final String URL_PRED = "https://api.mongolab.com/api/1/databases/yelptest/collections/prediction";
     private final String KEY = "uUA22oxSPz3xkYkVkYY8ju3hYPMDugfK";
@@ -167,7 +167,7 @@ public class FoodRecSVD {
             JSONObject select = new JSONObject();
             InputStream isr;
             Scanner scan;
-            String line, rid, url;
+            String line, url;
             HttpClient httpclient = new DefaultHttpClient();
 
             select.put(RESTID, 1);
@@ -180,11 +180,10 @@ public class FoodRecSVD {
             isr = entity.getContent();
 
             scan = new Scanner(isr);
-            while ((line = scan.nextLine()) != null) {
+            while (scan.hasNextLine()) {
+                line = scan.nextLine();
                 if (line.contains(RESTID)) {
-                    rid = getData(RESTID, line);
-                    restIndex.put(rid, restID.size());
-                    restID.add(rid);
+                    getRestData(line);
                 }
             }
         } catch (Exception e) {
@@ -213,12 +212,12 @@ public class FoodRecSVD {
             scan = new Scanner(isr);
             while ((line = scan.nextLine()) != null) {
                 if (line.contains(USERID)) {
-                    uid = getData(USERID, line);
+/*                    uid = getData(USERID, line);
                     // parse data
                     if (!userID.contains(uid)) {
                         userIndex.put(uid, userID.size());
                         userID.add(uid);
-                    }
+                    }*/
                 }
             }
         } catch (Exception e) {
@@ -257,11 +256,11 @@ public class FoodRecSVD {
             while ((line = scan.nextLine()) != null) {
                 if (line.contains(USERID) && line.contains(RESTID) && line.contains(RATING)) {
                     // get user_id, business_id and user tree to put rating in matrix
-                    uid = getData(USERID, line);
+                    /*uid = getData(USERID, line);
                     rid = getData(RESTID, line);
                     rat = getData(RATING, line);
 
-                    ratingsMat.set(userIndex.get(uid), restIndex.get(rid), Double.parseDouble(rat));
+                    ratingsMat.set(userIndex.get(uid), restIndex.get(rid), Double.parseDouble(rat));*/
                 }
             }
         } catch (Exception e) {
@@ -307,23 +306,20 @@ public class FoodRecSVD {
         }
     }
 
-    private String getData(String id, String line) {
-        int col, com;
-        String result;
+    private void getRestData(String line) {
+        int open, closed;
+        String rid;
 
-        col = line.indexOf(id);
-        col = line.indexOf(":", col);
-        com = line.indexOf(",", col);
-        result = line.substring(col+1, com);
-        
-        if(result.charAt(0)=='"'){
-            result = result.substring(1);
-        }
-        
-        if(result.charAt(result.length()-1)=='"'){
-            result = result.substring(0,result.length()-1);
-        }
+        while (line.contains(RESTID)) {
+            open = line.indexOf(RESTID);
+            open = line.indexOf(":", open);
+            open = line.indexOf("\"", open);
+            closed = line.indexOf("\"", open + 1);
+            rid = line.substring(open + 1, closed);
+            line = line.substring(closed);
 
-        return (line.substring(col + 1, com));
+            restIndex.put(rid, restID.size());
+            restID.add(rid);
+        }
     }
 }
