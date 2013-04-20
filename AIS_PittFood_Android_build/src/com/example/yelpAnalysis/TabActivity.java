@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,6 +34,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class TabActivity extends FragmentActivity implements ActionBar.TabListener {	
 	
 	static ArrayList<String> ratingList = new ArrayList<String>();
+	static ArrayList<String> categoryList = new ArrayList<String>();
+	static ArrayList<String> starList = new ArrayList<String>();
+	static ArrayList<String> nameList = new ArrayList<String>();
 	
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide fragments representing
@@ -57,6 +61,11 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
         // get data from intent
      	Bundle bundle = this.getIntent().getExtras();
      	ratingList= (ArrayList<String>) bundle.getSerializable("ratingList");
+     	try {
+			createSeparList();
+		} catch (JSONException e) {
+			Toast.makeText(getApplicationContext(), "Check Internet connection", Toast.LENGTH_SHORT).show();
+		}
  
         // Create an adapter that when requested, will return a fragment representing an object in
         // the collection.
@@ -202,10 +211,27 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
     		
     		listView = (ListView) view.findViewById(R.id.list);		
     		
-    		ListAdapter customAdapter = new ListAdapter(getActivity(), R.layout.listtab_content, ratingList);
-    		listView.setAdapter(customAdapter);
+    		ListAdapter customAdapter;
+			try {
+				customAdapter = new ListAdapter(getActivity(), R.layout.listtab_content, ratingList, categoryList, starList, nameList);
+				listView.setAdapter(customAdapter);
+			} catch (JSONException e) {
+				
+			}
+			
             return view;
         }
     }
     
+    public void createSeparList() throws JSONException{
+    	ConnMongoLab conn = new ConnMongoLab();
+    	String bidData = "";
+    	
+    	for(int i=0;i<ratingList.size();i++){
+			bidData = ratingList.get(i);
+			categoryList.add(conn.getCategory(conn, bidData));
+			starList.add(conn.getStar(conn, bidData));
+			nameList.add(conn.getName(conn, bidData));
+		}
+    }
 }

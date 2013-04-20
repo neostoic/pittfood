@@ -12,37 +12,24 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ListAdapter extends ArrayAdapter<String>{
-	// ready to retrieve data from database
-	ConnMongoLab conn = new ConnMongoLab();
-	
-	public ListAdapter(Context context, int resource) {
-	    super(context, resource);
-	}
-	
+public class ListAdapter extends ArrayAdapter<String> {
 	// passed in parameters
 	private ArrayList<String> items;
-	
-	public ListAdapter(Context context, int resource, ArrayList<String> items) {
-		super(context, resource, items);
-		this.items=items;
+	private ArrayList<String> category;
+	private ArrayList<String> star;
+	private ArrayList<String> name;
+
+	// pre-fetch the data
+	public ListAdapter(Context context, int resource, ArrayList<String> ratingList, ArrayList<String> categoryList, ArrayList<String> starList, ArrayList<String> nameList) throws JSONException {
+		super(context, resource, ratingList);
+		this.items = ratingList;
+		this.category = categoryList;
+		this.star = starList;
+		this.name = nameList;
 	}
 	
-	@Override
 	public View getView(int position, View convertView, ViewGroup parent) { 
 	    String bid = items.get(position);
-		// pre-fetch the data
-	    String categoryData ="";
-	    String starData = "";
-	    String nameData = "";
-		try {
-			categoryData = conn.getCategory(conn, bid);
-			starData = conn.getStar(conn, bid);
-			nameData = conn.getName(conn, bid);
-		} catch (JSONException e) {
-			categoryData = starData = nameData = "error";
-		}
-
 		View v = convertView;
 		
 	    if (v == null) {
@@ -52,13 +39,13 @@ public class ListAdapter extends ArrayAdapter<String>{
 	    }
 	    
 	    if (bid != null) {
-	    	TextView title = (TextView)v.findViewById(R.id.title);
+	    	TextView titleView = (TextView)v.findViewById(R.id.title);
 	    	ImageView iv = (ImageView)v.findViewById(R.id.image);
-	    	TextView category = (TextView)v.findViewById(R.id.intro);
-	    	TextView star = (TextView)v.findViewById(R.id.intro2);
+	    	TextView categoryView = (TextView)v.findViewById(R.id.intro);
+	    	TextView starView = (TextView)v.findViewById(R.id.intro2);
 	    	
-	    	if(title!=null){
-	    		title.setText(nameData);
+	    	if(titleView!=null){
+	    		titleView.setText(name.get(position));
 	    	}
 	    	if(iv!=null){
 	    		switch(position){
@@ -76,11 +63,11 @@ public class ListAdapter extends ArrayAdapter<String>{
 	    				break;
 	    		} 
 	    	}
-	    	if(category!=null){
-	    		category.setText(categoryData);
+	    	if(categoryView!=null){
+	    		categoryView.setText(category.get(position));
 	    	}
-	    	if(star!=null){
-	    		star.setText(starData);
+	    	if(starView!=null){
+	    		starView.setText(star.get(position));
 	    	}
 	    }
 	    return v;
