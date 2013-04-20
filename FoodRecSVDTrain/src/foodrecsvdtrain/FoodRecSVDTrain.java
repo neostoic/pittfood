@@ -27,6 +27,7 @@ public class FoodRecSVDTrain {
     private double[] movieAvgRate;
     private Map<Integer, Integer> restIndex, userIndex;
     private int k;
+    private SingularValueDecomposition svd;
 
     /**
      * @param args the command line arguments
@@ -42,13 +43,14 @@ public class FoodRecSVDTrain {
         init();
         LoadMatrix();
         FillBlanks();
-        
+        svd = ratingsMat.svd();
+
         // use MSE to smallest k to give good results
         do {
             k++;
             lastMSE = currMSE;
             currMSE = CalcPred();
-        } while(lastMSE > currMSE+DIFF);
+        } while (lastMSE > currMSE + DIFF);
 
         uploadK();
     }
@@ -85,6 +87,10 @@ public class FoodRecSVDTrain {
                     movieSumRate += ratingsMat.get(j, i);
                     movieRateCount++;
                 }
+            }
+            if (movieRateCount == 0) {
+                movieAvgRate[i] = ((MAX_SCORE - MIN_SCORE) / 2) + MIN_SCORE;
+            } else {
                 movieAvgRate[i] = movieSumRate / movieRateCount;
             }
         }
@@ -104,12 +110,11 @@ public class FoodRecSVDTrain {
 
     // DONT TOUCH
     private double CalcPred() {
-        SingularValueDecomposition svd = ratingsMat.svd();
         Matrix temp, temp2;
         double t, ss = 0;
         int count = 0;
 
-        if (k < svd.rank()-1) {
+        if (k < svd.rank() - 1) {
             Matrix Uk = svd.getU().getMatrix(0, ratingsMat.getRowDimension() - 1, 0, k);
             Matrix Sk = svd.getS().getMatrix(0, k, 0, k);
             Matrix VkT = svd.getV().getMatrix(0, ratingsMat.getColumnDimension() - 1, 0, k).transpose();
@@ -124,7 +129,7 @@ public class FoodRecSVDTrain {
             temp = Uk.times(Sk);
             temp2 = Sk.times(VkT);
             temp = temp.times(temp2);
-            
+
             // sum of square errors from previously rated matrix
             for (int i = 0; i < predMat.getRowDimension(); i++) {
                 for (int j = 0; j < predMat.getColumnDimension(); j++) {
