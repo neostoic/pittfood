@@ -1,5 +1,7 @@
 package com.example.yelpAnalysis;
 
+import java.util.ArrayList;
+
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.State;
 import android.os.Bundle;
@@ -18,7 +20,7 @@ import android.view.WindowManager;
 public class SplashActivity extends Activity {
 
 	private static String TAG = SplashActivity.class.getName();
-	private static long SLEEP_TIME = 1;
+	private static long SLEEP_TIME = 3;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +48,26 @@ public class SplashActivity extends Activity {
 		@Override
 		public void run(){
 			try {
-				Thread.sleep(SLEEP_TIME*1000);
+				Thread.sleep(SLEEP_TIME*500);
 			} catch (Exception e){
 				Log.e(TAG, "HAHAHA: "+e);
 			}
 			
+			// test arraylist
+			ArrayList<String> values = new ArrayList<String>();
+		 	values.add("tHLJ1pDaaHptb-EbFM2q_A");
+			values.add("74wRr6PP6lbaL1YzUcYGAA");
+			values.add("caGXS6ubNTlv91ZZyoirjQ");
+			values.add("P8nY22PirIp-d1GpDn7qnA");
+			values.add("_rKz-rQPzUAIZWlUHCKgow");
+			values.add("pCwOCE-cycl6cMEa9O6bZQ");
+			values.add("1TUn8LfJBfOdWes5bL_DOA");
+			values.add("WjkjrsOzMAQ2wgY9tVyS0Q");
+			values.add("XqNDr54eLDLRfZwo4l4dVA");
+			values.add("Eg_M8eeu9SDEdbP7iUmVbQ");
+			
 			Intent intent = new Intent(SplashActivity.this, TabActivity.class);
+			intent.putExtra("ratingList", values);
 			SplashActivity.this.startActivity(intent);
 			SplashActivity.this.finish();
 		}

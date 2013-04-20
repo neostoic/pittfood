@@ -6,32 +6,22 @@ import org.json.JSONException;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.FragmentTransaction;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo.State;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,8 +30,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class TabActivity extends FragmentActivity implements ActionBar.TabListener {
-
+public class TabActivity extends FragmentActivity implements ActionBar.TabListener {	
+	
+	static ArrayList<String> ratingList = new ArrayList<String>();
+	
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide fragments representing
      * each object in a collection. We use a {@link android.support.v4.app.FragmentStatePagerAdapter}
@@ -56,10 +48,15 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
      */
     ViewPager mViewPager;
 
-    public void onCreate(Bundle savedInstanceState) {
+    @SuppressWarnings("unchecked")
+	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState); 
         setContentView(R.layout.activity_main); 
         StrictMode.enableDefaults();
+        
+        // get data from intent
+     	Bundle bundle = this.getIntent().getExtras();
+     	ratingList= (ArrayList<String>) bundle.getSerializable("ratingList");
  
         // Create an adapter that when requested, will return a fragment representing an object in
         // the collection.
@@ -166,51 +163,30 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
     // map tab
     public static class ConnMap extends Fragment {
     	private GoogleMap map;
-    	static final LatLng QUAKER = new LatLng(40.44074158649877, -79.9581527709961);
-    	static final LatLng GOLDEN = new LatLng(40.440937557567004, -79.95813131332397);
-    	static final LatLng PRIMANTI = new LatLng(40.441629575831264, -79.95686799287796);
-    	static final LatLng FIVE = new LatLng(40.44258695808571, -79.95654344558716);
+		ConnMongoLab conn = new ConnMongoLab();
     	
     	@Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View mapView = inflater.inflate(R.layout.activity_map, container, false);
             
-            ConnMongoLab conn = new ConnMongoLab();
-            
             map = ((SupportMapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
-            try {
-            	String qsl = conn.getData("tHLJ1pDaaHptb-EbFM2q_A");
-            	String gpb = conn.getData("74wRr6PP6lbaL1YzUcYGAA");
-            	String pb = conn.getData("caGXS6ubNTlv91ZZyoirjQ");
-            	String fgb = conn.getData("P8nY22PirIp-d1GpDn7qnA");
+            for(int i=0;i<ratingList.size();i++){
+            	String bid = ratingList.get(i);
             	
-    			map.addMarker(new MarkerOptions().position(QUAKER)
-    					.title("Quaker Steak & Lube")
-    					.snippet(qsl.split("\"|,")[9]+qsl.split("\"|,")[10])
-    					.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon)));
-    			map.addMarker(new MarkerOptions().position(GOLDEN)
-    					.title("Golden Palace Buffet")
-    					.snippet(gpb.split("\"|,")[9]+gpb.split("\"|,")[10])
-    					.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon)));
-    	        map.addMarker(new MarkerOptions().position(PRIMANTI)
-    			        .title("Primanti Brothers")
-    			        .snippet(pb.split("\"|,")[9]+pb.split("\"|,")[10])
-    			        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon))
-    	        );
-    	        map.addMarker(new MarkerOptions().position(FIVE)
-    			        .title("Five Guys")
-    			        .snippet(fgb.split("\"|,")[9]+fgb.split("\"|,")[10])
-    			        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon))
-    	        );
-    		} catch (JSONException e) {
-    			Log.e("log_tag", "Error in http connection "+e.toString());
-                Toast.makeText(getActivity().getApplicationContext(), "Miss JSON objects", Toast.LENGTH_SHORT).show();
-    		}
+				try {
+					map.addMarker(new MarkerOptions().position(new LatLng(conn.getLatitude(conn,bid),conn.getLongitude(conn,bid)))
+					.title(conn.getName(conn,bid))
+					.snippet(conn.getStar(conn,bid))
+					.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon)));
+				} catch (JSONException e) {
+				
+				}
+			}
             // Move the camera instantly with a zoom of 18.
     	    map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.441091, -79.957626), 14));
     	    // Zoom in, animating the camera.
-    	    map.animateCamera(CameraUpdateFactory.zoomTo(17), 2000, null);
+    	    map.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
             return mapView;
         }
     }
@@ -222,23 +198,11 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
     	@Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-    		
-    		ConnMongoLab conn = new ConnMongoLab();
     		View view = inflater.inflate(R.layout.listtab_view, container, false);
     		
-    		listView = (ListView) view.findViewById(R.id.list);
-    		ArrayList<String> values = new ArrayList<String>();
-    			try {
-					values.add(conn.getData("tHLJ1pDaaHptb-EbFM2q_A"));
-					values.add(conn.getData("74wRr6PP6lbaL1YzUcYGAA"));
-	    			values.add(conn.getData("caGXS6ubNTlv91ZZyoirjQ"));
-	    			values.add(conn.getData("P8nY22PirIp-d1GpDn7qnA")); 
-				} catch (JSONException e) {
-					Log.e("log_tag", "Error  converting result "+e.toString());
-		            Toast.makeText(getActivity(), "Please check your connection", Toast.LENGTH_SHORT).show();
-				}			
+    		listView = (ListView) view.findViewById(R.id.list);		
     		
-    		ListAdapter customAdapter = new ListAdapter(getActivity(), R.layout.listtab_content, values);
+    		ListAdapter customAdapter = new ListAdapter(getActivity(), R.layout.listtab_content, ratingList);
     		listView.setAdapter(customAdapter);
             return view;
         }

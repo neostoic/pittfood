@@ -2,6 +2,8 @@ package com.example.yelpAnalysis;
 
 import java.util.ArrayList;
 
+import org.json.JSONException;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ListAdapter extends ArrayAdapter<String>{
-
+	// ready to retrieve data from database
+	ConnMongoLab conn = new ConnMongoLab();
+	
 	public ListAdapter(Context context, int resource) {
 	    super(context, resource);
 	}
@@ -25,25 +29,36 @@ public class ListAdapter extends ArrayAdapter<String>{
 	}
 	
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-	    View v = convertView;
+	public View getView(int position, View convertView, ViewGroup parent) { 
+	    String bid = items.get(position);
+		// pre-fetch the data
+	    String categoryData ="";
+	    String starData = "";
+	    String nameData = "";
+		try {
+			categoryData = conn.getCategory(conn, bid);
+			starData = conn.getStar(conn, bid);
+			nameData = conn.getName(conn, bid);
+		} catch (JSONException e) {
+			categoryData = starData = nameData = "error";
+		}
 
+		View v = convertView;
+		
 	    if (v == null) {
 	        LayoutInflater vi;
 	        vi = LayoutInflater.from(getContext());
 	        v = vi.inflate(R.layout.listtab_content, null);
 	    }
 	    
-	    String p = items.get(position);
-	    
-	    if (p != null) {
+	    if (bid != null) {
 	    	TextView title = (TextView)v.findViewById(R.id.title);
 	    	ImageView iv = (ImageView)v.findViewById(R.id.image);
-	    	TextView review = (TextView)v.findViewById(R.id.intro);
+	    	TextView category = (TextView)v.findViewById(R.id.intro);
 	    	TextView star = (TextView)v.findViewById(R.id.intro2);
 	    	
 	    	if(title!=null){
-	    		title.setText(p.split("\"")[5]);
+	    		title.setText(nameData);
 	    	}
 	    	if(iv!=null){
 	    		switch(position){
@@ -59,13 +74,13 @@ public class ListAdapter extends ArrayAdapter<String>{
 	    			case 3:
 	    				iv.setImageResource(R.drawable.fgb);
 	    				break;
-	    		}
+	    		} 
 	    	}
-	    	if(review!=null){
-	    		review.setText(p.split("\"|,")[1]+p.split("\"|,")[2]);
+	    	if(category!=null){
+	    		category.setText(categoryData);
 	    	}
 	    	if(star!=null){
-	    		star.setText(p.split("\"|,")[9]+p.split("\"|,")[10]);
+	    		star.setText(starData);
 	    	}
 	    }
 	    return v;
