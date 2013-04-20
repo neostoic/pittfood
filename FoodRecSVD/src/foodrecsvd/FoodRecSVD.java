@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
 
 /**
@@ -291,16 +292,21 @@ public class FoodRecSVD {
             // upload prediction t for user i and restaurant j
             httpclient = new DefaultHttpClient();
             JSONObject json = new JSONObject();
-            url = URL_PRED + "&apiKey=" + KEY;
+            url = URL_PRED + "?apiKey=" + KEY;
 
             post = new HttpPost(url);
             json.put(USERID, userID.get(i));
             json.put(RESTID, restID.get(j));
             json.put(PRED, t);
             se = new StringEntity(json.toString());
-            se.setContentType(new BasicHeader("Content-Type", "application/json"));
+            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
             post.setEntity(se);
-            httpclient.execute(post);
+            HttpResponse response = httpclient.execute(post);
+            
+            /*Checking response */
+            if (response != null) {
+                InputStream in = response.getEntity().getContent(); //Get the data in the entity
+            }
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
