@@ -8,6 +8,8 @@ import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 import java.io.File;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
@@ -33,13 +35,14 @@ public class FoodRecSVD {
 
     private final String KFILE = "../k.txt";
     private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/restaurant";
-    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/<ratings_table>";
+    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/rating";
     private final String URL_PRED = "https://api.mongolab.com/api/1/databases/yelptest/collections/prediction";
     private final String KEY = "uUA22oxSPz3xkYkVkYY8ju3hYPMDugfK";
     private final String USERID = "user_id";
     private final String RESTID = "business_id";
     private final String RATING = "rating";
     private final String PRED = "prediction";
+    private final String OUR_USER = "pf_";
     private final int MAX_SCORE = 5;
     private final int MIN_SCORE = 1;
     // global variables
@@ -60,8 +63,8 @@ public class FoodRecSVD {
     private FoodRecSVD() {
         init();
         LoadMatrix();
-        //FillBlanks();
-        //CalcPred();
+        FillBlanks();
+        CalcPred();
     }
 
     // DONT TOUCH
@@ -75,11 +78,11 @@ public class FoodRecSVD {
 
     private void LoadMatrix() {
         fillRestData();
-        //fillUserData();
+        fillUserData();
 
-        //ratingsMat = new Matrix(userID.size(), restID.size());
-        //fillRatings();
-        //predMat = new Matrix(userID.size(), restID.size());
+        ratingsMat = new Matrix(userID.size(), restID.size());
+        fillRatings();
+        predMat = new Matrix(userID.size(), restID.size());
     }
 
     // DONT TOUCH
@@ -98,6 +101,11 @@ public class FoodRecSVD {
                     movieSumRate += ratingsMat.get(j, i);
                     movieRateCount++;
                 }
+            }
+
+            if (movieRateCount == 0) {
+                movieAvgRate[i] = ((MAX_SCORE - MIN_SCORE) / 2) + MIN_SCORE;
+            } else {
                 movieAvgRate[i] = movieSumRate / movieRateCount;
             }
         }
@@ -110,6 +118,15 @@ public class FoodRecSVD {
                     predMat.set(j, i, 0); // prediction needed
                 } else {
                     predMat.set(j, i, -1); // prediction not needed
+
+                    if(userID.get(i).contains(OUR_USER)){
+                    // delete from prediction
+                    try {
+                        delete(j, i);
+                    } catch (Exception e) {
+                        System.err.println(e.getMessage());
+                    }
+                    }
                 }
             }
         }
@@ -211,14 +228,10 @@ public class FoodRecSVD {
             isr = entity.getContent();
 
             scan = new Scanner(isr);
-            while ((line = scan.nextLine()) != null) {
+            while (scan.hasNextLine()) {
+                line = scan.nextLine();
                 if (line.contains(USERID)) {
-/*                    uid = getData(USERID, line);
-                    // parse data
-                    if (!userID.contains(uid)) {
-                        userIndex.put(uid, userID.size());
-                        userID.add(uid);
-                    }*/
+                    getUserData(line);
                 }
             }
         } catch (Exception e) {
@@ -254,14 +267,11 @@ public class FoodRecSVD {
             isr = entity.getContent();
 
             scan = new Scanner(isr);
-            while ((line = scan.nextLine()) != null) {
+            while (scan.hasNextLine()) {
+                line = scan.nextLine();
                 if (line.contains(USERID) && line.contains(RESTID) && line.contains(RATING)) {
                     // get user_id, business_id and user tree to put rating in matrix
-                    /*uid = getData(USERID, line);
-                    rid = getData(RESTID, line);
-                    rat = getData(RATING, line);
-
-                    ratingsMat.set(userIndex.get(uid), restIndex.get(rid), Double.parseDouble(rat));*/
+                    getRateData(line);
                 }
             }
         } catch (Exception e) {
@@ -271,27 +281,20 @@ public class FoodRecSVD {
 
     // DONT TOUCH
     private void upload(int i, int j, double t) {
+        if (userID.get(i).contains(OUR_USER)) {
         try {
             // delete previous prediction
-            String url;
-            HttpClient httpclient = new DefaultHttpClient();
-            JSONObject delete = new JSONObject();
-            HttpPost post;
-            StringEntity se;
-            
-            delete.put(USERID, userID.get(i));
-            delete.put(RESTID, restID.get(j));
-            url = URL_PRED + "?q=" + URLEncoder.encode(delete.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
-
-            post = new HttpPost(url);
-            se = new StringEntity("");
-            se.setContentType(new BasicHeader("Content-Type", "application/json"));
-            post.setEntity(se);
-            httpclient.execute(post);
+            delete(i, j);
 
             // upload prediction t for user i and restaurant j
-            httpclient = new DefaultHttpClient();
+            String url;
+            HttpClient httpclient = new DefaultHttpClient();
             JSONObject json = new JSONObject();
+            HttpPost post;
+            StringEntity se;
+            HttpResponse response;
+
+            httpclient = new DefaultHttpClient();
             url = URL_PRED + "?apiKey=" + KEY;
 
             post = new HttpPost(url);
@@ -301,14 +304,15 @@ public class FoodRecSVD {
             se = new StringEntity(json.toString());
             se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
             post.setEntity(se);
-            HttpResponse response = httpclient.execute(post);
-            
+            response = httpclient.execute(post);
+
             /*Checking response */
             if (response != null) {
                 InputStream in = response.getEntity().getContent(); //Get the data in the entity
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
+        }
         }
     }
 
@@ -327,5 +331,104 @@ public class FoodRecSVD {
             restIndex.put(rid, restID.size());
             restID.add(rid);
         }
+    }
+
+    private void getUserData(String line) {
+        int open, closed;
+        String uid;
+
+        while (line.contains(USERID)) {
+            open = line.indexOf(USERID);
+            open = line.indexOf(":", open);
+            open = line.indexOf("\"", open);
+            closed = line.indexOf("\"", open + 1);
+            uid = line.substring(open + 1, closed);
+            line = line.substring(closed);
+
+            if (!userID.contains(uid)) {
+                userIndex.put(uid, userID.size());
+                userID.add(uid);
+            }
+        }
+    }
+
+    private void getRateData(String line) {
+        String uid, rid, rat;
+        int open, closed;
+
+        while (line.contains(USERID) && line.contains(RESTID) && line.contains(RATING)) {
+            open = line.indexOf(RESTID);
+            open = line.indexOf(":", open);
+            open = line.indexOf("\"", open);
+            closed = line.indexOf("\"", open + 1);
+            rid = line.substring(open + 1, closed);
+            line = line.substring(closed);
+
+            open = line.indexOf(USERID);
+            open = line.indexOf(":", open);
+            open = line.indexOf("\"", open);
+            closed = line.indexOf("\"", open + 1);
+            uid = line.substring(open + 1, closed);
+            line = line.substring(closed);
+
+            open = line.indexOf(RATING);
+            open = line.indexOf(":", open);
+            closed = line.indexOf("}", open);
+            rat = line.substring(open + 1, closed).trim();
+
+            ratingsMat.set(userIndex.get(uid), restIndex.get(rid), Double.parseDouble(rat));
+        }
+    }
+
+    private void delete(int ui, int ri) throws Exception {
+        String url;
+        HttpClient httpclient = new DefaultHttpClient();
+        JSONObject match = new JSONObject();
+        JSONObject select = new JSONObject();
+        String line,id="";
+
+        match.put(USERID, userID.get(ui));
+        match.put(RESTID, restID.get(ri));
+        select.put("_id",1);
+        url = URL_PRED + "?q=" + URLEncoder.encode(match.toString(), "ISO-8859-1") +"&f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+        HttpGet httpget = new HttpGet(url);
+            HttpResponse response = httpclient.execute(httpget);
+            HttpEntity entity = response.getEntity();
+            InputStream isr = entity.getContent();
+
+            Scanner scan = new Scanner(isr);
+            while (scan.hasNextLine()) {
+                line = scan.nextLine();
+                if (line.contains("_id")) {
+                    // get user_id, business_id and user tree to put rating in matrix
+                    id = getID("$oid",line);
+                }
+            }
+            
+            if(id.length()>0){
+                // document exists delete it
+                url = URL_PRED+"/"+id+"?apiKey="+KEY;
+                URL u = new URL(url);
+                
+                HttpURLConnection conn =(HttpURLConnection) u.openConnection();
+	    	conn.setRequestMethod("DELETE");
+	    	conn.setDoOutput(true);
+	    	conn.setRequestProperty("Content-Type", "application/json");
+                scan = new Scanner(conn.getInputStream());
+	    	
+            }
+    }
+
+    private String getID(String type, String line) {
+        int open, closed;
+        String result;
+        
+        open = line.indexOf(type);
+            open = line.indexOf(":", open);
+            open = line.indexOf("\"", open);
+            closed = line.indexOf("\"", open + 1);
+            result = line.substring(open + 1, closed);
+
+            return result;
     }
 }
