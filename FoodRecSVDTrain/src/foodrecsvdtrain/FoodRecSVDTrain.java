@@ -72,6 +72,7 @@ public class FoodRecSVDTrain {
             } while (currMSE!= Double.MAX_VALUE);
 
             // print MSE and upload k for regular prediction program
+            out.close();
             System.out.println("MSE: " + bestMSE);
             uploadK(bestK);
         } catch (Exception e) {
