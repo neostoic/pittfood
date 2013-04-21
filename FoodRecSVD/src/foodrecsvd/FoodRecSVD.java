@@ -30,15 +30,16 @@ public class FoodRecSVD {
     // constants
 
     private final String KFILE = "../k.txt";
-    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/restaurant";
-    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/rating";
-    private final String URL_PRED = "https://api.mongolab.com/api/1/databases/yelptest/collections/prediction";
+    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/newrestaurant";
+    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/newrating";
+    private final String URL_PRED = "https://api.mongolab.com/api/1/databases/yelptest/collections/newprediction";
     private final String KEY = "uUA22oxSPz3xkYkVkYY8ju3hYPMDugfK";
     private final String USERID = "user_id";
     private final String RESTID = "business_id";
     private final String RATING = "rating";
     private final String PRED = "prediction";
     private final String OUR_USER = "pf_";
+    private final int LIMIT = 10000;
     private final int MAX_SCORE = 5;
     private final int MIN_SCORE = 1;
     // global variables
@@ -115,7 +116,7 @@ public class FoodRecSVD {
                 } else {
                     predMat.set(j, i, -1); // prediction not needed
 
-                    if (userID.get(i).contains(OUR_USER)) {
+                    if (userID.get(j).contains(OUR_USER)) {
                         // delete duplicate in prediction table if it exists
                         //  only would be our users, not yelp users
                         try {
@@ -192,7 +193,7 @@ public class FoodRecSVD {
             select.put(RESTID, 1);
             select.put("_id", 0);
 
-            url = URL_REST + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+            url = URL_REST + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&l=" + LIMIT + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
             HttpResponse response = httpclient.execute(httpget);
             HttpEntity entity = response.getEntity();
@@ -223,9 +224,11 @@ public class FoodRecSVD {
             HttpClient httpclient = new DefaultHttpClient();
 
             select.put(USERID, 1);
+            select.put(RESTID, 1);
+            select.put(RATING, 1);
             select.put("_id", 0);
 
-            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&l=" + LIMIT + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
             HttpResponse response = httpclient.execute(httpget);
             HttpEntity entity = response.getEntity();
@@ -266,7 +269,7 @@ public class FoodRecSVD {
             select.put(RATING, 1);
             select.put("_id", 0);
 
-            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&l=" + LIMIT + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
             HttpResponse response = httpclient.execute(httpget);
             HttpEntity entity = response.getEntity();
@@ -301,7 +304,7 @@ public class FoodRecSVD {
                 HttpResponse response;
 
                 httpclient = new DefaultHttpClient();
-                url = URL_PRED + "?apiKey=" + KEY;
+                url = URL_PRED + "?l=" + LIMIT + "&apiKey=" + KEY;
 
                 post = new HttpPost(url);
                 json.put(USERID, userID.get(i));
@@ -401,7 +404,7 @@ public class FoodRecSVD {
         match.put(USERID, userID.get(ui));
         match.put(RESTID, restID.get(ri));
         select.put("_id", 1);
-        url = URL_PRED + "?q=" + URLEncoder.encode(match.toString(), "ISO-8859-1") + "&f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+        url = URL_PRED + "?q=" + URLEncoder.encode(match.toString(), "ISO-8859-1") + "&f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&l=" + LIMIT + "&apiKey=" + KEY;
         HttpGet httpget = new HttpGet(url);
         HttpResponse response = httpclient.execute(httpget);
         HttpEntity entity = response.getEntity();
@@ -418,7 +421,7 @@ public class FoodRecSVD {
 
         if (id.length() > 0) {
             // document exists delete it
-            url = URL_PRED + "/" + id + "?apiKey=" + KEY;
+            url = URL_PRED + "/" + id + "?l=" + LIMIT + "&apiKey=" + KEY;
             URL u = new URL(url);
 
             HttpURLConnection conn = (HttpURLConnection) u.openConnection();

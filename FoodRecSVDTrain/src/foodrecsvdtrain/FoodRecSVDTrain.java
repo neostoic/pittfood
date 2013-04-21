@@ -34,6 +34,7 @@ public class FoodRecSVDTrain {
     private final int MAX_SCORE = 5;
     private final int MIN_SCORE = 1;
     private final int STARTING_K = 0;
+    private final int LIMIT = 10000;
     
     // global variables
     private Matrix ratingsMat, predMat;
@@ -198,7 +199,7 @@ public class FoodRecSVDTrain {
             select.put(RESTID, 1);
             select.put("_id", 0);
 
-            url = URL_REST + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+            url = URL_REST + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&l=" + LIMIT + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
             HttpResponse response = httpclient.execute(httpget);
             HttpEntity entity = response.getEntity();
@@ -231,7 +232,7 @@ public class FoodRecSVDTrain {
             select.put(USERID, 1);
             select.put("_id", 0);
 
-            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&l=" + LIMIT + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
             HttpResponse response = httpclient.execute(httpget);
             HttpEntity entity = response.getEntity();
@@ -272,7 +273,7 @@ public class FoodRecSVDTrain {
             select.put(RATING, 1);
             select.put("_id", 0);
 
-            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+            url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&l=" + LIMIT + "&apiKey=" + KEY;
             HttpGet httpget = new HttpGet(url);
             HttpResponse response = httpclient.execute(httpget);
             HttpEntity entity = response.getEntity();
