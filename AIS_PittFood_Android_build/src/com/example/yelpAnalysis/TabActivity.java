@@ -1,6 +1,8 @@
 package com.example.yelpAnalysis;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONException;
 
@@ -16,6 +18,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,14 +34,16 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class TabActivity extends FragmentActivity implements ActionBar.TabListener {	
+public class TabActivity extends FragmentActivity implements ActionBar.TabListener {
 	
+	// test for passed-in array list
 	static ArrayList<String> ratingList = new ArrayList<String>();
 	static ArrayList<String> categoryList = new ArrayList<String>();
 	static ArrayList<String> starList = new ArrayList<String>();
 	static ArrayList<String> nameList = new ArrayList<String>();
-	
-    /**
+	static ArrayList<String> picList = new ArrayList<String>();
+    
+	/**
      * The {@link android.support.v4.view.PagerAdapter} that will provide fragments representing
      * each object in a collection. We use a {@link android.support.v4.app.FragmentStatePagerAdapter}
      * derivative, which will destroy and re-create fragments as needed, saving and restoring their
@@ -57,16 +62,17 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
         super.onCreate(savedInstanceState); 
         setContentView(R.layout.activity_main); 
         StrictMode.enableDefaults();
-        
+ 
         // get data from intent
      	Bundle bundle = this.getIntent().getExtras();
      	ratingList= (ArrayList<String>) bundle.getSerializable("ratingList");
+        
      	try {
 			createSeparList();
 		} catch (JSONException e) {
 			Toast.makeText(getApplicationContext(), "Check Internet connection", Toast.LENGTH_SHORT).show();
 		}
- 
+     	
         // Create an adapter that when requested, will return a fragment representing an object in
         // the collection.
         // ViewPager and its adapters use support library fragments, so we must use
@@ -114,6 +120,15 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
 
 	@Override
 	public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {	
+	}
+	
+	public static String convertData(String s){
+		Pattern pattern = Pattern.compile("stars\\W+\\d\\.?\\d*");
+		Matcher matcher = pattern.matcher(s);
+		if(matcher.find()){
+			return matcher.group(0).replaceAll("\"", "");
+		}
+		return "Error";
 	}
 	
     // this is for 'setting' menu
@@ -172,7 +187,7 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
     // map tab
     public static class ConnMap extends Fragment {
     	private GoogleMap map;
-		ConnMongoLab conn = new ConnMongoLab();
+    	ConnMongoLab conn = new ConnMongoLab();
     	
     	@Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -181,17 +196,17 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
             
             map = ((SupportMapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
             for(int i=0;i<ratingList.size();i++){
-            	String bid = ratingList.get(i);
-            	
-				try {
-					map.addMarker(new MarkerOptions().position(new LatLng(conn.getLatitude(conn,bid),conn.getLongitude(conn,bid)))
-					.title(conn.getName(conn,bid))
-					.snippet(conn.getStar(conn,bid))
-					.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon)));
-				} catch (JSONException e) {
-				
-				}
-			}
+            	String bid = ratingList.get(i);	
+            	try {
+                	map.addMarker(new MarkerOptions().position(new LatLng(conn.getLatitude(conn,bid),conn.getLongitude(conn,bid)))
+        					.title(conn.getName(conn,bid))
+        					.snippet(conn.getStar(conn,bid))
+        					.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon)));
+        		} catch (JSONException e) {
+        			Log.e("log_tag", "Error in http connection "+e.toString());
+                    Toast.makeText(getActivity().getApplicationContext(), "Miss JSON objects", Toast.LENGTH_SHORT).show();
+        		}
+            }
             // Move the camera instantly with a zoom of 18.
     	    map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.441091, -79.957626), 14));
     	    // Zoom in, animating the camera.
@@ -207,18 +222,19 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
     	@Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
+    		
     		View view = inflater.inflate(R.layout.listtab_view, container, false);
     		
-    		listView = (ListView) view.findViewById(R.id.list);		
+    		listView = (ListView) view.findViewById(R.id.list);	
     		
     		ListAdapter customAdapter;
-			try {
-				customAdapter = new ListAdapter(getActivity(), R.layout.listtab_content, ratingList, categoryList, starList, nameList);
+    		try {
+				customAdapter = new ListAdapter(getActivity(), R.layout.listtab_content, ratingList, 
+						categoryList, starList, nameList, picList);
 				listView.setAdapter(customAdapter);
 			} catch (JSONException e) {
 				
 			}
-			
             return view;
         }
     }
@@ -232,6 +248,8 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
 			categoryList.add(conn.getCategory(conn, bidData));
 			starList.add(conn.getStar(conn, bidData));
 			nameList.add(conn.getName(conn, bidData));
+			picList.add(conn.getPic(conn, bidData));
 		}
     }
+    
 }

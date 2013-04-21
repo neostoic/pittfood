@@ -1,10 +1,14 @@
 package com.example.yelpAnalysis;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import org.json.JSONException;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,18 +22,22 @@ public class ListAdapter extends ArrayAdapter<String> {
 	private ArrayList<String> category;
 	private ArrayList<String> star;
 	private ArrayList<String> name;
+	private ArrayList<String> pic;
 
 	// pre-fetch the data
-	public ListAdapter(Context context, int resource, ArrayList<String> ratingList, ArrayList<String> categoryList, ArrayList<String> starList, ArrayList<String> nameList) throws JSONException {
+	public ListAdapter(Context context, int resource, ArrayList<String> ratingList, ArrayList<String> categoryList, 
+			ArrayList<String> starList, ArrayList<String> nameList, ArrayList<String> picList) throws JSONException {
 		super(context, resource, ratingList);
 		this.items = ratingList;
 		this.category = categoryList;
 		this.star = starList;
 		this.name = nameList;
+		this.pic = picList;
 	}
 	
 	public View getView(int position, View convertView, ViewGroup parent) { 
 	    String bid = items.get(position);
+	    String picURL = "";
 		View v = convertView;
 		
 	    if (v == null) {
@@ -48,20 +56,15 @@ public class ListAdapter extends ArrayAdapter<String> {
 	    		titleView.setText(name.get(position));
 	    	}
 	    	if(iv!=null){
-	    		switch(position){
-	    			case 0:
-	    				iv.setImageResource(R.drawable.qsl);
-	    				break;
-	    			case 1:
-	    				iv.setImageResource(R.drawable.gpb);
-	    				break;
-	    			case 2:
-	    				iv.setImageResource(R.drawable.pb);
-	    				break;
-	    			case 3:
-	    				iv.setImageResource(R.drawable.fgb);
-	    				break;
-	    		} 
+	    		picURL = pic.get(position);
+	    		try {
+					Bitmap bmp = BitmapFactory.decodeStream(new java.net.URL(picURL).openStream());
+					iv.setImageBitmap(bmp);
+				} catch (MalformedURLException e) {
+					
+				} catch (IOException e) {
+					
+				}
 	    	}
 	    	if(categoryView!=null){
 	    		categoryView.setText(category.get(position));
