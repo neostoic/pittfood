@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package foodrecsvd;
 
 import Jama.Matrix;
@@ -28,7 +24,7 @@ import org.json.JSONObject;
 
 /**
  *
- * @author Robo-Laptop
+ * @author Steven Nunnally part of the PittFood group
  */
 public class FoodRecSVD {
     // constants
@@ -47,7 +43,7 @@ public class FoodRecSVD {
     private final int MIN_SCORE = 1;
     // global variables
     private Matrix ratingsMat, predMat;
-    private double[] movieAvgRate;
+    private double[] restAvgRate;
     private ArrayList<String> restID, userID;
     private Map<String, Integer> restIndex, userIndex;
 
@@ -55,11 +51,9 @@ public class FoodRecSVD {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
         new FoodRecSVD();
     }
 
-    // DONT TOUCH
     private FoodRecSVD() {
         init();
         LoadMatrix();
@@ -67,7 +61,6 @@ public class FoodRecSVD {
         CalcPred();
     }
 
-    // DONT TOUCH
     private void init() {
         restID = new ArrayList<String>();
         userID = new ArrayList<String>();
@@ -85,28 +78,30 @@ public class FoodRecSVD {
         predMat = new Matrix(userID.size(), restID.size());
     }
 
-    // DONT TOUCH
+    // fill in blank ratings with restaurant averages rating or middle rating 
+    //  if no ratings exist for that restaurant
     private void FillBlanks() {
-        movieAvgRate = new double[ratingsMat.getColumnDimension()];
-        double movieSumRate;
-        int movieRateCount;
+        restAvgRate = new double[ratingsMat.getColumnDimension()];
+        double restSumRate;
+        int restRateCount;
 
-        // get avg rating for each movie
+        // get avg rating for each restaurant
         for (int i = 0; i < ratingsMat.getColumnDimension(); i++) {
-            movieSumRate = 0;
-            movieRateCount = 0;
+            restSumRate = 0;
+            restRateCount = 0;
 
             for (int j = 0; j < ratingsMat.getRowDimension(); j++) {
                 if (ratingsMat.get(j, i) != -1) {
-                    movieSumRate += ratingsMat.get(j, i);
-                    movieRateCount++;
+                    restSumRate += ratingsMat.get(j, i);
+                    restRateCount++;
                 }
             }
 
-            if (movieRateCount == 0) {
-                movieAvgRate[i] = ((MAX_SCORE - MIN_SCORE) / 2) + MIN_SCORE;
+            if (restRateCount == 0) {
+                // no ratings exist, make a middle of the line average
+                restAvgRate[i] = ((MAX_SCORE - MIN_SCORE) / 2) + MIN_SCORE;
             } else {
-                movieAvgRate[i] = movieSumRate / movieRateCount;
+                restAvgRate[i] = restSumRate / restRateCount;
             }
         }
 
@@ -114,25 +109,26 @@ public class FoodRecSVD {
         for (int i = 0; i < ratingsMat.getColumnDimension(); i++) {
             for (int j = 0; j < ratingsMat.getRowDimension(); j++) {
                 if (ratingsMat.get(j, i) == -1) {
-                    ratingsMat.set(j, i, movieAvgRate[i]);
+                    // blank fill in
+                    ratingsMat.set(j, i, restAvgRate[i]);
                     predMat.set(j, i, 0); // prediction needed
                 } else {
                     predMat.set(j, i, -1); // prediction not needed
 
-                    if(userID.get(i).contains(OUR_USER)){
-                    // delete from prediction
-                    try {
-                        delete(j, i);
-                    } catch (Exception e) {
-                        System.err.println(e.getMessage());
-                    }
+                    if (userID.get(i).contains(OUR_USER)) {
+                        // delete duplicate in prediction table if it exists
+                        //  only would be our users, not yelp users
+                        try {
+                            delete(j, i);
+                        } catch (Exception e) {
+                            System.err.println(e.getMessage());
+                        }
                     }
                 }
             }
         }
     }
 
-    // DONT TOUCH
     private void CalcPred() {
         SingularValueDecomposition svd = ratingsMat.svd();
         Matrix temp, temp2;
@@ -140,6 +136,7 @@ public class FoodRecSVD {
         double t;
 
         try {
+            // get trained k value for rank-k SVD
             Scanner scan = new Scanner(new File(KFILE));
             k = scan.nextInt();
         } catch (Exception e) {
@@ -158,6 +155,7 @@ public class FoodRecSVD {
             }
         }
 
+        // get predictions using SVD
         temp = Uk.times(Sk);
         temp2 = Sk.times(VkT);
         temp = temp.times(temp2);
@@ -167,6 +165,7 @@ public class FoodRecSVD {
             for (int j = 0; j < predMat.getColumnDimension(); j++) {
                 if (predMat.get(i, j) == 0) {
                     t = temp.get(i, j);
+                    // trim prediction
                     if (t > MAX_SCORE) {
                         t = MAX_SCORE;
                     } else if (t < MIN_SCORE) {
@@ -179,9 +178,11 @@ public class FoodRecSVD {
         }
     }
 
+    // get restaurant ids from the restaurant table
     private void fillRestData() {
         // get all restaurant data from DB
         try {
+            // access rating table data
             JSONObject select = new JSONObject();
             InputStream isr;
             Scanner scan;
@@ -201,6 +202,7 @@ public class FoodRecSVD {
             while (scan.hasNextLine()) {
                 line = scan.nextLine();
                 if (line.contains(RESTID)) {
+                    // extract restaurant ids
                     getRestData(line);
                 }
             }
@@ -209,13 +211,15 @@ public class FoodRecSVD {
         }
     }
 
+    // get user ids from the rating table
     private void fillUserData() {
-        // get all user data from DB
+        // get all user ids from DB
         try {
+            // access rating table data
             JSONObject select = new JSONObject();
             InputStream isr;
             Scanner scan;
-            String line, uid, url;
+            String line, url;
             HttpClient httpclient = new DefaultHttpClient();
 
             select.put(USERID, 1);
@@ -231,6 +235,7 @@ public class FoodRecSVD {
             while (scan.hasNextLine()) {
                 line = scan.nextLine();
                 if (line.contains(USERID)) {
+                    // extract user ids
                     getUserData(line);
                 }
             }
@@ -238,7 +243,8 @@ public class FoodRecSVD {
             System.err.println(e.getMessage());
         }
     }
-
+    
+    // fill in ratings matrix
     private void fillRatings() {
         // start with empty ratings matrix
         for (int i = 0; i < ratingsMat.getRowDimension(); i++) {
@@ -252,7 +258,7 @@ public class FoodRecSVD {
             JSONObject select = new JSONObject();
             InputStream isr;
             Scanner scan;
-            String line, url, uid, rid, rat;
+            String line, url;
             HttpClient httpclient = new DefaultHttpClient();
 
             select.put(USERID, 1);
@@ -270,7 +276,7 @@ public class FoodRecSVD {
             while (scan.hasNextLine()) {
                 line = scan.nextLine();
                 if (line.contains(USERID) && line.contains(RESTID) && line.contains(RATING)) {
-                    // get user_id, business_id and user tree to put rating in matrix
+                    // extract rating data and fill matrix
                     getRateData(line);
                 }
             }
@@ -279,43 +285,44 @@ public class FoodRecSVD {
         }
     }
 
-    // DONT TOUCH
+    // upload rating from matrix at i,j of rating t
     private void upload(int i, int j, double t) {
         if (userID.get(i).contains(OUR_USER)) {
-        try {
-            // delete previous prediction
-            delete(i, j);
+            try {
+                // delete previous prediction to avoid duplicates
+                delete(i, j);
 
-            // upload prediction t for user i and restaurant j
-            String url;
-            HttpClient httpclient = new DefaultHttpClient();
-            JSONObject json = new JSONObject();
-            HttpPost post;
-            StringEntity se;
-            HttpResponse response;
+                // upload prediction t for user i and restaurant j
+                String url;
+                HttpClient httpclient = new DefaultHttpClient();
+                JSONObject json = new JSONObject();
+                HttpPost post;
+                StringEntity se;
+                HttpResponse response;
 
-            httpclient = new DefaultHttpClient();
-            url = URL_PRED + "?apiKey=" + KEY;
+                httpclient = new DefaultHttpClient();
+                url = URL_PRED + "?apiKey=" + KEY;
 
-            post = new HttpPost(url);
-            json.put(USERID, userID.get(i));
-            json.put(RESTID, restID.get(j));
-            json.put(PRED, t);
-            se = new StringEntity(json.toString());
-            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-            post.setEntity(se);
-            response = httpclient.execute(post);
+                post = new HttpPost(url);
+                json.put(USERID, userID.get(i));
+                json.put(RESTID, restID.get(j));
+                json.put(PRED, t);
+                se = new StringEntity(json.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                post.setEntity(se);
+                response = httpclient.execute(post);
 
-            /*Checking response */
-            if (response != null) {
-                InputStream in = response.getEntity().getContent(); //Get the data in the entity
+                /*Checking response */
+                if (response != null) {
+                    InputStream in = response.getEntity().getContent(); //Get the data in the entity
+                }
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
         }
     }
 
+    // extract all restaurant ids from the line
     private void getRestData(String line) {
         int open, closed;
         String rid;
@@ -333,6 +340,7 @@ public class FoodRecSVD {
         }
     }
 
+    // extract all user ids from the line
     private void getUserData(String line) {
         int open, closed;
         String uid;
@@ -352,6 +360,7 @@ public class FoodRecSVD {
         }
     }
 
+    // extract all rating data from the line
     private void getRateData(String line) {
         String uid, rid, rat;
         int open, closed;
@@ -380,55 +389,58 @@ public class FoodRecSVD {
         }
     }
 
+    // delete the prediction document with user id and restaurant id given
     private void delete(int ui, int ri) throws Exception {
+        // find prediction document id
         String url;
         HttpClient httpclient = new DefaultHttpClient();
         JSONObject match = new JSONObject();
         JSONObject select = new JSONObject();
-        String line,id="";
+        String line, id = "";
 
         match.put(USERID, userID.get(ui));
         match.put(RESTID, restID.get(ri));
-        select.put("_id",1);
-        url = URL_PRED + "?q=" + URLEncoder.encode(match.toString(), "ISO-8859-1") +"&f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
+        select.put("_id", 1);
+        url = URL_PRED + "?q=" + URLEncoder.encode(match.toString(), "ISO-8859-1") + "&f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&apiKey=" + KEY;
         HttpGet httpget = new HttpGet(url);
-            HttpResponse response = httpclient.execute(httpget);
-            HttpEntity entity = response.getEntity();
-            InputStream isr = entity.getContent();
+        HttpResponse response = httpclient.execute(httpget);
+        HttpEntity entity = response.getEntity();
+        InputStream isr = entity.getContent();
 
-            Scanner scan = new Scanner(isr);
-            while (scan.hasNextLine()) {
-                line = scan.nextLine();
-                if (line.contains("_id")) {
-                    // get user_id, business_id and user tree to put rating in matrix
-                    id = getID("$oid",line);
-                }
+        Scanner scan = new Scanner(isr);
+        while (scan.hasNextLine()) {
+            line = scan.nextLine();
+            if (line.contains("_id")) {
+                // get user_id, business_id and user tree to put rating in matrix
+                id = getID("$oid", line);
             }
-            
-            if(id.length()>0){
-                // document exists delete it
-                url = URL_PRED+"/"+id+"?apiKey="+KEY;
-                URL u = new URL(url);
-                
-                HttpURLConnection conn =(HttpURLConnection) u.openConnection();
-	    	conn.setRequestMethod("DELETE");
-	    	conn.setDoOutput(true);
-	    	conn.setRequestProperty("Content-Type", "application/json");
-                scan = new Scanner(conn.getInputStream());
-	    	
-            }
+        }
+
+        if (id.length() > 0) {
+            // document exists delete it
+            url = URL_PRED + "/" + id + "?apiKey=" + KEY;
+            URL u = new URL(url);
+
+            HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+            conn.setRequestMethod("DELETE");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json");
+            scan = new Scanner(conn.getInputStream());
+
+        }
     }
 
+    // get the first id string of the given type from line
     private String getID(String type, String line) {
         int open, closed;
         String result;
-        
-        open = line.indexOf(type);
-            open = line.indexOf(":", open);
-            open = line.indexOf("\"", open);
-            closed = line.indexOf("\"", open + 1);
-            result = line.substring(open + 1, closed);
 
-            return result;
+        open = line.indexOf(type);
+        open = line.indexOf(":", open);
+        open = line.indexOf("\"", open);
+        closed = line.indexOf("\"", open + 1);
+        result = line.substring(open + 1, closed);
+
+        return result;
     }
 }

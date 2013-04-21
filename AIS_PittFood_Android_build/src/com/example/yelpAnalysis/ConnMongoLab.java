@@ -75,4 +75,15 @@ public class ConnMongoLab {
 		
 		return category;
 	}
+	
+	public String getPic(ConnMongoLab test, String bid) throws JSONException {
+		String picURL = "";
+		JSONObject json = null;
+		JSONArray jsonarray = null;
+		jsonarray = test.getData(bid);
+		json = jsonarray.getJSONObject(0);
+		picURL = json.getString("photo_url");
+		
+		return picURL;
+	}
 }
