@@ -64,16 +64,15 @@ public class RestClient {
 
 				// Closing the input stream will trigger connection release
 				instream.close();
-			}
-			
+			}		
 
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+
+		} finally {
+			httpclient.getConnectionManager().shutdown();
+		}
 		return result;
 	}
 

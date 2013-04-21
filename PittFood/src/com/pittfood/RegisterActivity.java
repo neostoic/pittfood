@@ -1,5 +1,7 @@
 package com.pittfood;
 
+import org.json.JSONException;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -47,7 +49,38 @@ public class RegisterActivity extends Activity {
 	    	    if (userFunction.userExists(username) == 0 ) {
 	    	    	userFunction.registerUser(username, password, name);
 	    	    	
-	    	    	registerErrorMsg.setText("Successfully registered. Please login.");
+	    	    	
+	    	    		DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+						String userid = null;
+						try {
+							userid = userFunction.getUserid(username);
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						String created_date = null;
+						try {
+							created_date = userFunction.getCreatedDate(username);
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						userFunction.logoutUser(getApplicationContext());
+						db.addUser(userid, username, name, created_date);
+						
+						// Launch Dashboard Screen
+                        Intent rating = new Intent(getApplicationContext(), RatingActivity.class);
+
+                        // Close all views before launching Dashboard
+                        rating.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(rating);
+
+                        // Close Login Screen
+                        finish();
+	                 
+	                
+	               
 	    	    	
 	    	    }
 	    	    else {      

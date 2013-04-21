@@ -46,7 +46,7 @@ public class UserFunctions {
         		String created_date = sdf.format(cal.getTime());
 
                 try {
-                	int userid = countUser() + 1;
+                	String userid = "pf_" + Integer.toString(countUser() + 1);
                     HttpPost post = new HttpPost(registerURL);
                     json.put("userid", userid);
                     json.put("username", username);
@@ -80,8 +80,7 @@ public class UserFunctions {
 		String gu = rc.connect(url);
 		JSONArray jsonarray = new JSONArray(gu);
 		JSONObject json = jsonarray.getJSONObject(0);
-		int id = json.getInt("userid");
-		String userid = Integer.toString(id);
+		String userid = json.getString("userid");
 		return userid;
 	}
 	
@@ -139,7 +138,7 @@ public class UserFunctions {
         int count = db.getRowCount();
         if(count > 0){
             HashMap <String,String> userDetail = db.getUserDetails();
-            name = userDetail.get("name");
+            name = userDetail.get("username");
         }
         return name;
     }

@@ -33,6 +33,10 @@
             android:name="com.pittfood.DashboardActivity"
             android:label="@string/title_activity_dashboard" >
         </activity>
+        <activity
+            android:name="com.pittfood.RatingActivity"
+            android:label="@string/title_activity_rating" >
+        </activity>
     </application>
 
 </manifest>

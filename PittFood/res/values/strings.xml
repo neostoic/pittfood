@@ -14,5 +14,8 @@
     <string name="name">Name</string>
     <string name="title_activity_dashboard">Dashboard</string>
     <string name="welcome">Welcome!</string>
+    <string name="title_activity_rating">Rating</string>
+    <string name="rate">Rate the restaurants that you have been to.</string>
+    <string name="gotorec">Next</string>
 
 </resources>

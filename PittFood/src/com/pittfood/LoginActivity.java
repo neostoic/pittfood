@@ -53,7 +53,7 @@ public class LoginActivity extends Activity {
 						String name = userFunction.getName(username);
 						String created_date = userFunction.getCreatedDate(username);
 						
-						
+						userFunction.logoutUser(getApplicationContext());
 						db.addUser(userid, username, name, created_date);
 						
 						// Launch Dashboard Screen
