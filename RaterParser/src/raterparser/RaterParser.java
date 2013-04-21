@@ -29,8 +29,8 @@ public class RaterParser {
     private static final String UID = "user_id";
     private static final String RID = "business_id";
     private static final String STAR = "stars";
-    private static final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/restaurant";
-    private static final String URL_RAT = "https://api.mongolab.com/api/1/databases/yelptest/collections/rating?";
+    private static final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/newrestaurant";
+    private static final String URL_RAT = "https://api.mongolab.com/api/1/databases/yelptest/collections/newrating?";
     private static final String RAT = "rating";
     private static final String KEY = "uUA22oxSPz3xkYkVkYY8ju3hYPMDugfK";
     

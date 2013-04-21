@@ -24,8 +24,8 @@ import org.json.JSONObject;
 public class FoodRecSVDTrain {
     // constants
     private final String KFILE = "../k.txt";
-    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/restaurant";
-    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/rating";
+    private final String URL_REST = "https://api.mongolab.com/api/1/databases/yelptest/collections/newrestaurant";
+    private final String URL_RATE = "https://api.mongolab.com/api/1/databases/yelptest/collections/newrating";
     private final String KEY = "uUA22oxSPz3xkYkVkYY8ju3hYPMDugfK";
     private final String USERID = "user_id";
     private final String RESTID = "business_id";
@@ -177,6 +177,7 @@ public class FoodRecSVDTrain {
             }
         } else {
             // max k
+            System.out.println("Maxed k");
             ss = Double.MAX_VALUE;
             count++;
         }
