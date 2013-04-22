@@ -41,6 +41,7 @@ public class FoodRecSVDTrain {
     private double[] restAvgRate;
     private Map<String, Integer> restIndex, userIndex;
     private SingularValueDecomposition svd;
+    private int maxK=0;
 
     /**
      * @param args the command line arguments
@@ -75,6 +76,8 @@ public class FoodRecSVDTrain {
             // print MSE and upload k for regular prediction program
             out.close();
             System.out.println("MSE: " + bestMSE);
+            System.out.println("Max k: " + maxK);
+            System.out.println("Best k: " + bestK);
             uploadK(bestK);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -178,7 +181,7 @@ public class FoodRecSVDTrain {
             }
         } else {
             // max k
-            System.out.println("Maxed k");
+            maxK = k;
             ss = Double.MAX_VALUE;
             count++;
         }
