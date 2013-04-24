@@ -9,6 +9,7 @@ import org.json.JSONException;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -62,11 +63,15 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
         super.onCreate(savedInstanceState); 
         setContentView(R.layout.activity_main); 
         StrictMode.enableDefaults();
+        
+        getActionBar().setDisplayHomeAsUpEnabled(true);
  
         // get data from intent
      	Bundle bundle = this.getIntent().getExtras();
      	ratingList= (ArrayList<String>) bundle.getSerializable("ratingList");
         
+     	//Toast.makeText(getApplicationContext(), "Loading...", Toast.LENGTH_LONG).show();
+     	
      	try {
 			createSeparList();
 		} catch (JSONException e) {
@@ -147,6 +152,12 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
 	    	this.finish();
 	    	return true;
 	    }
+	    if(item.getItemId()==android.R.id.home) {
+	    	Intent intent = new Intent(TabActivity.this, SelectRecActivity.class);
+	    	TabActivity.this.startActivity(intent);
+	    	TabActivity.this.finish();
+	    	return true;
+	    }
 	    return false;
 	}
     
@@ -210,7 +221,7 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
             // Move the camera instantly with a zoom of 18.
     	    map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.441091, -79.957626), 14));
     	    // Zoom in, animating the camera.
-    	    map.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
+    	    map.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
             return mapView;
         }
     }

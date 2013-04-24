@@ -39,6 +39,7 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -48,9 +49,30 @@
             android:name="com.example.yelpAnalysis.ListFragment"
             android:label="@string/title_activity_list_fragment" >
         </activity>
-        <activity  android:name="com.example.yelpAnalysis.TabActivity"
+        <activity
+            android:name="com.example.yelpAnalysis.TabActivity"
             android:label="@string/title_activity_tab" >
         </activity>
+        <activity
+            android:name="com.example.yelpAnalysis.SelectRecActivity"
+            android:label="@string/title_activity_select_rec" >
+        </activity>
+        <activity
+            android:name="com.example.yelpAnalysis.LoadingActivity"
+            android:label="@string/title_activity_loading" >
+        </activity>
+        <activity
+            android:name="com.Yuwei.pittfood.LoginActivity"
+            android:label="Login" >
+        </activity>
+        <activity
+            android:name="com.Yuwei.pittfood.RegisterActivity"
+            android:label="Register" >
+        </activity>
+        <activity
+            android:name="com.Yuwei.pittfood.RatingActivity"
+            android:label="@string/title_activity_rating" >
+        </activity>
     </application>
-</manifest>
 
+</manifest>

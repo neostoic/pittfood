@@ -161,39 +161,83 @@ containing a value of this type.
         public static final int qsl=0x7f020008;
     }
     public static final class id {
-        public static final int action_settings=0x7f040010;
-        public static final int food=0x7f040008;
+        public static final int LinearLayout1=0x7f04001d;
+        public static final int LinearLayout2=0x7f040025;
+        public static final int action_settings=0x7f040030;
+        public static final int amount_0=0x7f040013;
+        public static final int amount_1=0x7f040014;
+        public static final int amount_2=0x7f040015;
+        public static final int btnLinkToLoginScreen=0x7f04002b;
+        public static final int btnLinkToRecScreen=0x7f040024;
+        public static final int btnLinkToRegisterScreen=0x7f040022;
+        public static final int btnLogin=0x7f040020;
+        public static final int btnLogout=0x7f040017;
+        public static final int btnRegister=0x7f040029;
+        public static final int dashboardName=0x7f040016;
+        public static final int food=0x7f040006;
+        public static final int food_logo=0x7f04000c;
         public static final int hybrid=0x7f040004;
-        public static final int image=0x7f04000a;
-        public static final int intro=0x7f04000b;
-        public static final int intro2=0x7f04000c;
-        public static final int list=0x7f04000d;
-        public static final int map=0x7f040006;
-        public static final int maplaunch_button=0x7f04000e;
-        public static final int menu_exit=0x7f04000f;
+        public static final int image=0x7f040019;
+        public static final int intro=0x7f04001a;
+        public static final int intro2=0x7f04001b;
+        public static final int list=0x7f04001c;
+        public static final int loginPassword=0x7f04001f;
+        public static final int loginUsername=0x7f04001e;
+        public static final int login_error=0x7f040021;
+        public static final int mainSpinner=0x7f040007;
+        public static final int map=0x7f04000a;
+        public static final int maplaunch_button=0x7f040023;
+        public static final int menu_exit=0x7f04002f;
         public static final int none=0x7f040000;
         public static final int normal=0x7f040001;
-        public static final int pager=0x7f040005;
-        public static final int pitt=0x7f040007;
+        public static final int pager=0x7f040009;
+        public static final int pitt=0x7f040005;
+        public static final int pitt_logo=0x7f04000b;
+        public static final int radioGroup1=0x7f04000d;
+        public static final int radioGroup2=0x7f04000e;
+        public static final int ratingBar=0x7f04002e;
+        public static final int rec_0=0x7f04000f;
+        public static final int rec_1=0x7f040010;
+        public static final int rec_2=0x7f040011;
+        public static final int rec_button=0x7f040012;
+        public static final int registerName=0x7f040028;
+        public static final int registerPassword=0x7f040027;
+        public static final int registerUsername=0x7f040026;
+        public static final int register_error=0x7f04002a;
+        public static final int resadd=0x7f04002d;
+        public static final int resname=0x7f04002c;
         public static final int satellite=0x7f040002;
         public static final int terrain=0x7f040003;
-        public static final int title=0x7f040009;
+        public static final int textView1=0x7f040008;
+        public static final int title=0x7f040018;
     }
     public static final class layout {
-        public static final int activity_main=0x7f030000;
-        public static final int activity_map=0x7f030001;
-        public static final int activity_splash=0x7f030002;
-        public static final int listtab_content=0x7f030003;
-        public static final int listtab_view=0x7f030004;
-        public static final int maptab_content=0x7f030005;
+        public static final int activity_loading=0x7f030000;
+        public static final int activity_main=0x7f030001;
+        public static final int activity_map=0x7f030002;
+        public static final int activity_select_rec=0x7f030003;
+        public static final int activity_splash=0x7f030004;
+        public static final int dashboard=0x7f030005;
+        public static final int listtab_content=0x7f030006;
+        public static final int listtab_view=0x7f030007;
+        public static final int login=0x7f030008;
+        public static final int maptab_content=0x7f030009;
+        public static final int rating=0x7f03000a;
+        public static final int register=0x7f03000b;
+        public static final int reslistview=0x7f03000c;
     }
     public static final class menu {
         public static final int activity_main=0x7f090000;
         public static final int list=0x7f090001;
-        public static final int splash=0x7f090002;
+        public static final int loading=0x7f090002;
+        public static final int select_rec=0x7f090003;
+        public static final int splash=0x7f090004;
     }
     public static final class string {
         public static final int action_settings=0x7f050016;
+        public static final int amount_10=0x7f050021;
+        public static final int amount_15=0x7f050022;
+        public static final int amount_5=0x7f050020;
         public static final int app_name=0x7f050011;
         /**   Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=70] 
          */
@@ -257,14 +301,35 @@ containing a value of this type.
         find the service-side assets. [CHAR LIMIT=25] 
          */
         public static final int common_signin_button_text_long=0x7f05000d;
+        public static final int currentuser=0x7f05002b;
         public static final int dummy_button=0x7f050019;
         public static final int dummy_content=0x7f05001a;
         public static final int exit_menu=0x7f050014;
+        public static final int gotorec=0x7f050032;
         public static final int hello_world=0x7f050017;
+        public static final int loading=0x7f050025;
+        public static final int login=0x7f050028;
+        public static final int logout=0x7f05002c;
         public static final int map_launch=0x7f050012;
         public static final int menu_settings=0x7f050013;
+        public static final int name=0x7f05002d;
+        public static final int newuser=0x7f050029;
+        public static final int password=0x7f050027;
+        public static final int rate=0x7f050031;
+        public static final int recButton=0x7f05001c;
+        public static final int rec_both=0x7f05001f;
+        public static final int rec_new=0x7f05001d;
+        public static final int rec_old=0x7f05001e;
+        public static final int rec_select_text=0x7f050023;
+        public static final int signup=0x7f05002a;
+        public static final int title_activity_dashboard=0x7f05002e;
         public static final int title_activity_list_fragment=0x7f050015;
+        public static final int title_activity_loading=0x7f050024;
+        public static final int title_activity_rating=0x7f050030;
+        public static final int title_activity_select_rec=0x7f05001b;
         public static final int title_activity_tab=0x7f050018;
+        public static final int username=0x7f050026;
+        public static final int welcome=0x7f05002f;
     }
     public static final class style {
         /** 
