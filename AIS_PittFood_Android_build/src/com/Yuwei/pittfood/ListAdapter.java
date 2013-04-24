@@ -21,7 +21,7 @@ public class ListAdapter extends ArrayAdapter<String> {
 	private ArrayList <String> nameList;
 	private ArrayList <String> addressList;
 	
-	public final static float [] ratings = new float[11]; 
+	public static float [] ratings;  
 
 	public ListAdapter(Context context, int resource, ArrayList <String> bidList, ArrayList <String> nameList, ArrayList <String> addressList) throws JSONException {
 	    super(context, resource, bidList);
@@ -34,7 +34,7 @@ public class ListAdapter extends ArrayAdapter<String> {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		String bid = bidList.get(position);
 		View v = convertView;
-		
+		ratings = new float[10];
 
         LayoutInflater vi;
         vi = LayoutInflater.from(getContext());

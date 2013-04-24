@@ -13,7 +13,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,8 +39,8 @@ public class SelectRecActivity extends Activity {
 	static ArrayList<Double> ratingList = new ArrayList<Double>();
 	static ArrayList<String> values = new ArrayList<String>();
 	static String user_id;
-	static String url = baseURL + ratingTable + "?q=%7b'user_id':'" + user_id + "'%7d&f=%7b'business_id':1,'rating':1%7d&" + apikey;;
-	static int count = 10;
+	static String url;
+	static int count;
 	static String prerating;
 
 	@Override
@@ -49,9 +48,6 @@ public class SelectRecActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_select_rec);
 		StrictMode.enableDefaults();
-
-		
-		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
         // Set up action bar.
         final ActionBar actionBar = getActionBar();
@@ -124,27 +120,32 @@ public class SelectRecActivity extends Activity {
 		button.setOnClickListener(new OnClickListener(){
 			
 			public void onClick(View v){
-				
-				// test arraylist
-				try {
-					getRes(prerating);
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				getBid(count);
-				
-				Intent intent = new Intent(SelectRecActivity.this, LoadingActivity.class);
-				intent.putExtra("ratingList", values);
-				SelectRecActivity.this.startActivity(intent);
-				values.clear();
-				SelectRecActivity.this.finish();
+				if((newSelect.isChecked()||oldSelect.isChecked()||bothSelect.isChecked())==false){
+					Toast.makeText(getApplicationContext(), "Please select a type and amount", Toast.LENGTH_SHORT).show();
+				} else if((fiveRest.isChecked()||tenRest.isChecked()||fiftRest.isChecked())==false){
+					Toast.makeText(getApplicationContext(), "Please select a type and amount", Toast.LENGTH_SHORT).show();
+				} else{
+					// test arraylist
+					try {
+						getRes(prerating);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					getBid(count);
+					
+					Intent intent = new Intent(SelectRecActivity.this, LoadingActivity.class);
+					intent.putExtra("ratingList", values);
+					SelectRecActivity.this.startActivity(intent);
+					values.clear();
+					SelectRecActivity.this.finish();
+				}		
 			}
 		});	
-	
 	}
 
+	
     // this is for 'setting' menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

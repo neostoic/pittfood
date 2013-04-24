@@ -3,11 +3,16 @@ package com.Yuwei.pittfood;
 import org.json.JSONException;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,6 +37,11 @@ public class RegisterActivity extends Activity {
 		
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+        
+        // Set up action bar.
+        final ActionBar actionBar = getActionBar();
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#002649")));
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		inputUsername = (EditText) findViewById(R.id.registerUsername);
         inputPassword = (EditText) findViewById(R.id.registerPassword);
@@ -102,5 +112,31 @@ public class RegisterActivity extends Activity {
                 finish();
             }
         });
+	}
+	
+    // this is for 'setting' menu
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+	}
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+	    //check selected menu item
+	    if(item.getItemId()==R.id.menu_exit) {
+	    //close the Activity
+	    	this.finish();
+	    	return true;
+	    }
+	    if(item.getItemId()==android.R.id.home) {
+	    	// back to last activity
+	    	Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+	    	RegisterActivity.this.startActivity(intent);
+	    	RegisterActivity.this.finish();
+	    	return true;
+	    }
+	    return false;
 	}
 }

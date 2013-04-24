@@ -69,8 +69,6 @@ public class TabActivity extends FragmentActivity implements ActionBar.TabListen
         // get data from intent
      	Bundle bundle = this.getIntent().getExtras();
      	ratingList= (ArrayList<String>) bundle.getSerializable("ratingList");
-        
-     	//Toast.makeText(getApplicationContext(), "Loading...", Toast.LENGTH_LONG).show();
      	
      	try {
 			createSeparList();

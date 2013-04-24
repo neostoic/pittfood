@@ -1,6 +1,5 @@
 package com.Yuwei.pittfood;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -17,8 +16,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -57,6 +59,10 @@ public class RatingActivity extends Activity {
 		
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+        
+        // Set up action bar.
+        final ActionBar actionBar = getActionBar();
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#002649")));
         
         userFunctions = new UserFunctions();	// Check login status in database
         
@@ -110,9 +116,12 @@ public class RatingActivity extends Activity {
 					                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 					                    post.setEntity(se);
 					                    response = client.execute(post);
+					                    bidList.clear();
+					                    nameList.clear();
+					                    addressList.clear();
 		
 					                    if(response!=null){
-					                        InputStream in = response.getEntity().getContent(); //Get the data in the entity
+					                        response.getEntity().getContent(); //Get the data in the entity
 					                    }
 		
 					                } catch(Exception e) {
