@@ -1,6 +1,7 @@
 package com.example.yelpAnalysis;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -220,6 +221,8 @@ public class SelectRecActivity extends Activity {
     			}
     		}
     	}
+    	Collections.reverse(ratingList);
+    	Collections.reverse(bidList);
     }
     
     private void getBid(int n) {
