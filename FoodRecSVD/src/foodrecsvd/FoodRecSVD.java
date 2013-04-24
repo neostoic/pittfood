@@ -224,8 +224,6 @@ public class FoodRecSVD {
             HttpClient httpclient = new DefaultHttpClient();
 
             select.put(USERID, 1);
-            select.put(RESTID, 1);
-            select.put(RATING, 1);
             select.put("_id", 0);
 
             url = URL_RATE + "?f=" + URLEncoder.encode(select.toString(), "ISO-8859-1") + "&l=" + LIMIT + "&apiKey=" + KEY;
