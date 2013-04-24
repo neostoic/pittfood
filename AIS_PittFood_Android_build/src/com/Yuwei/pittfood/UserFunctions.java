@@ -1,6 +1,5 @@
 package com.Yuwei.pittfood;
 
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -60,7 +59,7 @@ public class UserFunctions {
 
                     /*Checking response */
                     if(response!=null){
-                        InputStream in = response.getEntity().getContent(); //Get the data in the entity
+                        response.getEntity().getContent(); //Get the data in the entity
                     }
 
                 } catch(Exception e) {

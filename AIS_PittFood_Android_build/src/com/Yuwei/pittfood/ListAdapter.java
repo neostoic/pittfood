@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.json.JSONException;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,7 @@ public class ListAdapter extends ArrayAdapter<String> {
 	private ArrayList <String> nameList;
 	private ArrayList <String> addressList;
 	
-	public static float [] ratings;  
+	public static float [] ratings = new float[10];  
 
 	public ListAdapter(Context context, int resource, ArrayList <String> bidList, ArrayList <String> nameList, ArrayList <String> addressList) throws JSONException {
 	    super(context, resource, bidList);
@@ -34,7 +33,6 @@ public class ListAdapter extends ArrayAdapter<String> {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		String bid = bidList.get(position);
 		View v = convertView;
-		ratings = new float[10];
 
         LayoutInflater vi;
         vi = LayoutInflater.from(getContext());
@@ -49,8 +47,6 @@ public class ListAdapter extends ArrayAdapter<String> {
     	
 			if (nameView != null) {
 				nameView.setText(nameList.get(position));
-				
-				Log.e("name", nameList.get(position));
 			}
 			
 			if (addView != null)

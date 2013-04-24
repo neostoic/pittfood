@@ -24,6 +24,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -61,6 +63,7 @@ public class RatingActivity extends Activity {
         StrictMode.setThreadPolicy(policy);
         
         // Set up action bar.
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         final ActionBar actionBar = getActionBar();
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#002649")));
         
@@ -116,9 +119,9 @@ public class RatingActivity extends Activity {
 					                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 					                    post.setEntity(se);
 					                    response = client.execute(post);
-					                    bidList.clear();
-					                    nameList.clear();
-					                    addressList.clear();
+					                    //bidList.clear();
+					                    //nameList.clear();
+					                    //addressList.clear();
 		
 					                    if(response!=null){
 					                        response.getEntity().getContent(); //Get the data in the entity
@@ -175,6 +178,31 @@ public class RatingActivity extends Activity {
 			jsonarray.put(i,jsonarray.getJSONObject(j));
 			jsonarray.put(j,temp);
 		}
+	}
+	
+    // this is for 'setting' menu
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+	}
+	
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+	    //check selected menu item
+	    if(item.getItemId()==R.id.menu_exit) {
+	    //close the Activity
+	    	this.finish();
+	    	return true;
+	    }
+	    if(item.getItemId()==android.R.id.home) {
+	    	Intent intent = new Intent(RatingActivity.this, LoginActivity.class);
+	    	RatingActivity.this.startActivity(intent);
+	    	RatingActivity.this.finish();
+	    	return true;
+	    }
+	    return false;
 	}
 	
 }
