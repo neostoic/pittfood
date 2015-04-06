@@ -1,0 +1,1 @@
+This project is a collaborative final project for an adaptive information systems class.  The goal is to develop a system using either the yelp or foursquare database in order to create a personalized restaurant recomender system for users of these data bases who are students or live around the University of Pittsburgh.
